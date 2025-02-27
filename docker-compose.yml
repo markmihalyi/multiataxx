@@ -1,0 +1,30 @@
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: database
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "TempDBPass1"
+    ports:
+      - "1433:1433"
+    restart: always
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    depends_on:
+      - database
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=MultiAtaxx;User Id=sa;Password=TempDBPass1;
+    volumes:
+      - ./backend:/app
+
+volumes:
+  sql_data:
