@@ -3,18 +3,20 @@ using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    // DI IoC Container
-
     // appsettings.json kialakítása fejlesztői környezettől függően
-    builder.Configuration.AddJsonFile(
-        $"Backend/appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
-        optional: false,
-        reloadOnChange: true
-     ).AddEnvironmentVariables();
+    if (!Debugger.IsAttached)
+    {
+        builder.Configuration.AddJsonFile(
+            $"Backend/appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
+            optional: false,
+            reloadOnChange: true
+         ).AddEnvironmentVariables();
+    }
 
     // Adatbázis beállítása
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -37,18 +39,17 @@ var builder = WebApplication.CreateBuilder(args);
         });
 
     builder.Services.AddScoped<AuthService>();
-
     builder.Services.AddControllers();
-
-    // https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
 }
 
 var app = builder.Build();
 {
-    // Middleware lánc
-
-    if (app.Environment.IsDevelopment()) app.MapOpenApi();
+    app.MapOpenApi();
+    app.UseSwaggerUi(options =>
+    {
+        options.DocumentPath = "openapi/v1.json";
+    });
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
