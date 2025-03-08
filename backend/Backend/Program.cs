@@ -8,8 +8,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    // DI IoC Container
-
     // appsettings.json kialakítása fejlesztői környezettől függően
     if (!Debugger.IsAttached)
     {
@@ -41,18 +39,17 @@ var builder = WebApplication.CreateBuilder(args);
         });
 
     builder.Services.AddScoped<AuthService>();
-
     builder.Services.AddControllers();
-
-    // https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
 }
 
 var app = builder.Build();
 {
-    // Middleware lánc
-
-    if (app.Environment.IsDevelopment()) app.MapOpenApi();
+    app.MapOpenApi();
+    app.UseSwaggerUi(options =>
+    {
+        options.DocumentPath = "openapi/v1.json";
+    });
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
