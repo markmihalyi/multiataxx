@@ -3,6 +3,7 @@ using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Diagnostics;
 using System.Text;
 
@@ -39,16 +40,32 @@ var builder = WebApplication.CreateBuilder(args);
         });
 
     builder.Services.AddScoped<AuthService>();
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .ConfigureApiBehaviorOptions(options =>
+        {
+            options.SuppressMapClientErrors = true;
+        });
+
+
+    // OpenAPI + Swagger UI
     builder.Services.AddOpenApi();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "MultiAtaxx", Version = "v1" });
+
+        var xmlFile = "MultiAtaxx.API.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        c.IncludeXmlComments(xmlPath);
+    });
 }
 
 var app = builder.Build();
 {
     app.MapOpenApi();
-    app.UseSwaggerUi(options =>
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
     {
-        options.DocumentPath = "openapi/v1.json";
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MultiAtaxx");
     });
     app.UseAuthentication();
     app.UseAuthorization();
