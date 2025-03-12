@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Backend</name>
+    </assembly>
+    <members>
+        <member name="M:Backend.Controllers.AuthController.Register(Backend.DTOs.AuthRequestBody)">
+            <summary>
+            Új felhasználói fiók regisztrálása
+            </summary>
+            <param name="body">Regisztrációhoz szükséges adatok</param>
+            <response code="200">Sikeres regisztráció esetén</response>
+            <response code="400">Ha a kérés tartalma hibás</response>
+            <response code="409">Ha a megadott felhasználónév már foglalt</response>
+        </member>
+        <member name="M:Backend.Controllers.AuthController.Login(Backend.DTOs.AuthRequestBody)">
+            <summary>
+            Bejelentkezés egy meglévő felhasználói fiókba
+            </summary>
+            <param name="body">Bejelentkezéshez szükséges adatok</param>
+            <response code="200">Sikeres bejelentkezés esetén</response>
+            <response code="400">Ha a kérés tartalma hibás</response>
+            <response code="401">Ha a felhasználónév vagy jelszó helytelen</response>
+        </member>
+        <member name="M:Backend.Controllers.AuthController.RefreshAccessToken(Backend.DTOs.TokenRequestBody)">
+            <summary>
+            Felhasználó access tokenjének frissítése
+            </summary>
+            <param name="body">Új access token generálásához szükséges érvényes refresh token</param>
+            <response code="200">Sikeres access token generálás esetén</response>
+            <response code="400">Ha a kérés tartalma hibás</response>
+            <response code="401">Ha a refresh token érvénytelen vagy lejárt</response>
+        </member>
+    </members>
+</doc>
