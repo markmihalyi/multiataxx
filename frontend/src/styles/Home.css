@@ -1,0 +1,16 @@
+.container {
+	display: flex;
+	align-items: center;
+	height: calc(100% - 4rem);
+}
+@media (min-width: 768px) {
+	.container {
+		justify-content: center;
+		gap: 8rem;
+	}
+}
+@media (max-width: 767px) {
+	.container {
+		justify-content: space-evenly;
+	}
+}
