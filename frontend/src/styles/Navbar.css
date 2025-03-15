@@ -9,16 +9,12 @@
 }
 
 .navbar-brand {
-	font-size: 1.2rem;
+	font-size: 1.5rem;
 	font-weight: bold;
 	color: white;
 	text-decoration: none;
 	align-self: center;
 	/*transition: 0.15s;*/
-}
-
-.navbar-brand:hover {
-	color: rgba(255, 255, 255, 0.9);
 }
 
 .btn {
@@ -29,6 +25,13 @@
 	border-radius: 4px;
 	cursor: pointer;
 }
-.btn:hover {
-	background-color: #218838;
+
+@media (min-width: 768px) {
+	.navbar-brand:hover {
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.btn:hover {
+		background-color: #218838;
+	}
 }
