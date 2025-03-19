@@ -18,18 +18,23 @@ class Program
             if (gameState.CurrentPlayer == 1)
             {
                 Console.WriteLine("Lépj!");
+                Console.Write("Adj meg egy lépést honnan lépsz (x y formátumban): ");
+                string input2 = Console.ReadLine();
+                var parts2 = input2.Split(' ');
                 Console.Write("Adj meg egy lépést (x y formátumban): ");
                 string input = Console.ReadLine();
                 var parts = input.Split(' ');
 
                 if (parts.Length == 2 && int.TryParse(parts[0], out int x)
-                    && int.TryParse(parts[1], out int y))
+                    && int.TryParse(parts[1], out int y) && parts2.Length == 2 && int.TryParse(parts2[0], out int fromx)
+                    && int.TryParse(parts2[1], out int fromy))
                 {
-                    gameState.MakeMove(x, y);
+                    gameState.MakeMove(x, y, fromx, fromy);
                 }
                 else
                 {
                     Console.WriteLine("Érvénytelen lépés. Próbáld újra.");
+                    Thread.Sleep(2000);
                 }
             }
             else
