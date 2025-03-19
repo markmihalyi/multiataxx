@@ -12,6 +12,8 @@ function MultiJoin() {
 					navLink="/room-joined"
 					buttonText="Join Game"
 					dropdown={false}
+					options1={[]}
+					options2={[]}
 				/>
 			</div>
 		</>

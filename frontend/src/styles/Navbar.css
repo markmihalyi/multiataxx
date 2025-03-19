@@ -14,7 +14,6 @@
 	color: white;
 	text-decoration: none;
 	align-self: center;
-	/*transition: 0.15s;*/
 }
 
 .btn {
@@ -28,7 +27,7 @@
 
 @media (min-width: 768px) {
 	.navbar-brand:hover {
-		color: rgba(255, 255, 255, 0.9);
+		color: #ffffffe6;
 	}
 
 	.btn:hover {
