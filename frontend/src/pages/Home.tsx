@@ -1,8 +1,8 @@
 import { NavLink } from "react-router";
-import "../styles/Home.css";
 import Navbar from "../components/Navbar";
 import CustomButton from "../components/Button";
 import { MdPeopleAlt, MdPerson } from "react-icons/md";
+import "../styles/Home.css";
 
 function Home() {
 	return (
@@ -12,14 +12,14 @@ function Home() {
 				<NavLink to="/single-lobby" end>
 					<CustomButton
 						text="Single Player"
-						bgColor="green"
+						bgColor="button-green"
 						icon={<MdPerson className="button-icon" />}
 					/>
 				</NavLink>
 				<NavLink to="/multi-lobby" end>
 					<CustomButton
 						text="Multiplayer"
-						bgColor="blue"
+						bgColor="button-blue"
 						icon={<MdPeopleAlt className="button-icon" />}
 					/>
 				</NavLink>

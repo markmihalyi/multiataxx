@@ -9,15 +9,21 @@
 	background-color: #ececec;
 }
 
+#root {
+	height: 100%;
+}
+
 .body,
 html {
 	height: 100%;
 	margin: 0;
 	padding: 0;
+	border: none;
 }
 
-#root {
-	height: 100%;
+p {
+	color: white;
+	font-family: inherit;
 }
 
 a,
