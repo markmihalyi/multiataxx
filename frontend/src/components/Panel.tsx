@@ -8,8 +8,8 @@ type PanelProps = {
 	navLink: string;
 	buttonText: string;
 	dropdown: boolean;
-	options1?: string[];
-	options2?: string[];
+	options1: string[];
+	options2: string[];
 };
 
 const Panel: React.FC<PanelProps> = ({
@@ -44,7 +44,7 @@ const Panel: React.FC<PanelProps> = ({
 				<h2>{panelTitle}</h2>
 				<input
 					type="number"
-					inputMode="numeric" //for mobile
+					inputMode="numeric" //for mobile numeric keyboard
 					placeholder="000000"
 					pattern="\d{6}"
 				></input>
