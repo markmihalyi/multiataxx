@@ -4,7 +4,7 @@ import "../styles/Button.css";
 type ButtonProps = {
 	text: string;
 	bgColor: string;
-	icon?: React.ReactNode;
+	icon: React.ReactNode;
 };
 
 const CustomButton: React.FC<ButtonProps> = ({ text, bgColor, icon }) => {

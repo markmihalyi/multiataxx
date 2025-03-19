@@ -18,7 +18,7 @@
 	touch-action: manipulation;
 }
 
-.green {
+.button-green {
 	background-image: linear-gradient(
 		60deg,
 		#2fbc42 9.16%,
@@ -27,7 +27,7 @@
 	);
 }
 
-.blue {
+.button-blue {
 	background-image: linear-gradient(
 		60deg,
 		#4743bf 9.16%,
@@ -36,7 +36,7 @@
 	);
 }
 
-.purple {
+.button-purple {
 	background-image: linear-gradient(
 		60deg,
 		#680ca5 9.16%,
@@ -45,7 +45,7 @@
 	);
 }
 
-.teal {
+.button-teal {
 	background-image: linear-gradient(
 		60deg,
 		#2a7f92 9.16%,
@@ -72,29 +72,29 @@
 		padding: 0 1.8rem;
 		height: 10rem;
 		width: 12rem;
-		gap: 0.8rem;
+		/* gap: 0.8rem; */
 	}
 
 	.button-icon {
 		font-size: 4rem;
 	}
 
-	.green:hover {
+	.button-green:hover {
 		box-shadow: rgba(47, 193, 54, 0.629) 0 1px 30px;
 		transition-duration: 0.3s;
 	}
 
-	.blue:hover {
+	.button-blue:hover {
 		box-shadow: rgba(76, 87, 190, 0.634) 0 1px 30px;
 		transition-duration: 0.3s;
 	}
 
-	.purple:hover {
+	.button-purple:hover {
 		box-shadow: rgba(123, 20, 192, 0.634) 0 1px 30px;
 		transition-duration: 0.3s;
 	}
 
-	.teal:hover {
+	.button-teal:hover {
 		box-shadow: rgba(16, 136, 147, 0.634) 0 1px 30px;
 		transition-duration: 0.3s;
 	}

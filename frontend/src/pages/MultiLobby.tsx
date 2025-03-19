@@ -12,14 +12,14 @@ function MultiLobby() {
 				<NavLink to="/multi-join" end>
 					<CustomButton
 						text="Join a game"
-						bgColor="teal"
+						bgColor="button-teal"
 						icon={<FaArrowRightToBracket className="button-icon" />}
 					/>
 				</NavLink>
 				<NavLink to="/multi-host" end>
 					<CustomButton
 						text="Host a game"
-						bgColor="purple"
+						bgColor="button-purple"
 						icon={<BsCloudCheckFill className="button-icon" />}
 					/>
 				</NavLink>
