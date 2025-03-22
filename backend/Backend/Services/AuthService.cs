@@ -18,7 +18,9 @@ namespace Backend.Services
         public async Task<bool> RegisterUser(string username, string password)
         {
             if (_dbContext.Users.Any(u => u.Username == username))
+            {
                 return false;
+            }
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
             var user = new User { Username = username, PasswordHash = hashedPassword };
@@ -33,7 +35,9 @@ namespace Backend.Services
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            {
                 return null;
+            }
 
             string refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
@@ -47,9 +51,26 @@ namespace Backend.Services
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
             if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
                 return null;
-
+            }
             return user;
+        }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
+        public async Task DeleteRefreshToken(string refreshToken)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            if (user != null)
+            {
+                user.RefreshToken = null;
+                user.RefreshTokenExpiryTime = null;
+                await _dbContext.SaveChangesAsync();
+            }
         }
 
         public string GenerateAccessToken(User user)
@@ -69,7 +90,7 @@ namespace Backend.Services
             var token = new JwtSecurityToken(
                 issuer: jwtIssuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: credentials
             );
 

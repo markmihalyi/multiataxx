@@ -37,7 +37,35 @@ var builder = WebApplication.CreateBuilder(args);
                 ValidIssuer = jwtIssuer,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var path = context.HttpContext.Request.Path;
+
+                    var accessToken = context.HttpContext.Request.Cookies["access_token"];
+
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
         });
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowSpecificOrigins", builder =>
+            {
+                builder.WithOrigins("http://localhost:5173") // frontend
+                       .AllowCredentials()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
+    });
 
     builder.Services.AddScoped<AuthService>();
     builder.Services.AddControllers()
@@ -45,7 +73,6 @@ var builder = WebApplication.CreateBuilder(args);
         {
             options.SuppressMapClientErrors = true;
         });
-
 
     // OpenAPI + Swagger UI
     builder.Services.AddOpenApi();
@@ -69,6 +96,8 @@ var app = builder.Build();
     });
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseCors("AllowSpecificOrigins");
+
     app.MapControllers();
 }
 
