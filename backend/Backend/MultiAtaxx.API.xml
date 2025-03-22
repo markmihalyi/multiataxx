@@ -22,14 +22,19 @@
             <response code="400">Ha a kérés tartalma hibás</response>
             <response code="401">Ha a felhasználónév vagy jelszó helytelen</response>
         </member>
-        <member name="M:Backend.Controllers.AuthController.RefreshAccessToken(Backend.DTOs.TokenRequestBody)">
+        <member name="M:Backend.Controllers.AuthController.RefreshAccessToken">
             <summary>
             Felhasználó access tokenjének frissítése
             </summary>
-            <param name="body">Új access token generálásához szükséges érvényes refresh token</param>
             <response code="200">Sikeres access token generálás esetén</response>
             <response code="400">Ha a kérés tartalma hibás</response>
             <response code="401">Ha a refresh token érvénytelen vagy lejárt</response>
+        </member>
+        <member name="M:Backend.Controllers.AuthController.Logout">
+            <summary>
+            Felhasználó kijelentkeztetése
+            </summary>
+            <response code="200">Sikeres kijelentkezés esetén</response>
         </member>
     </members>
 </doc>
