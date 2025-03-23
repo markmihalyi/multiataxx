@@ -1,6 +1,7 @@
 ﻿using Backend.DTOs;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net.Mime;
 
 
@@ -10,8 +11,9 @@ namespace Backend.Controllers;
 [Route("api/auth")]
 [Produces(MediaTypeNames.Application.Json)]
 [Consumes(MediaTypeNames.Application.Json)]
-public class AuthController(AuthService authService) : ControllerBase
+public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authService) : ControllerBase
 {
+    private readonly TokenConfig _tokenConfig = tokenConfig.Value;
     private readonly AuthService _authService = authService;
 
     /// <summary>
@@ -76,7 +78,7 @@ public class AuthController(AuthService authService) : ControllerBase
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(15)
+            Expires = DateTime.UtcNow.Add(_tokenConfig.AccessTokenExpiration)
         });
 
         string refreshToken = user.RefreshToken ??= string.Empty;
@@ -85,7 +87,7 @@ public class AuthController(AuthService authService) : ControllerBase
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(30)
+            Expires = DateTime.UtcNow.Add(_tokenConfig.RefreshTokenExpiration)
         });
 
 
@@ -124,7 +126,7 @@ public class AuthController(AuthService authService) : ControllerBase
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(15)
+            Expires = DateTime.UtcNow.Add(_tokenConfig.AccessTokenExpiration)
         });
 
 

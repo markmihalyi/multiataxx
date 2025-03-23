@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -9,10 +10,9 @@ using System.Text;
 
 namespace Backend.Services
 {
-    public class AuthService(AppDbContext context, IConfiguration config)
+    public class AuthService(IOptions<TokenConfig> tokenConfig, AppDbContext context)
     {
-        private readonly IConfiguration _config = config;
-
+        private readonly TokenConfig _tokenConfig = tokenConfig.Value;
         private readonly AppDbContext _dbContext = context;
 
         public async Task<bool> RegisterUser(string username, string password)
@@ -22,7 +22,7 @@ namespace Backend.Services
                 return false;
             }
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
             var user = new User { Username = username, PasswordHash = hashedPassword };
 
             _dbContext.Users.Add(user);
@@ -75,10 +75,7 @@ namespace Backend.Services
 
         public string GenerateAccessToken(User user)
         {
-            string jwtKey = _config["JWT:Secret"] ?? throw new InvalidOperationException("JWT Key is missing in configuration.");
-            string jwtIssuer = _config["JWT:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is missing in configuration.");
-
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenConfig.JwtSecret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -88,9 +85,9 @@ namespace Backend.Services
             };
 
             var token = new JwtSecurityToken(
-                issuer: jwtIssuer,
+                issuer: _tokenConfig.JwtIssuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.Add(_tokenConfig.AccessTokenExpiration),
                 signingCredentials: credentials
             );
 
