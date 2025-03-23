@@ -1,6 +1,6 @@
 import { NavLink } from "react-router";
-import Navbar from "../components/Navbar";
-import CustomButton from "../components/Button";
+import Navbar from "../layouts/Navbar";
+import CustomButton from "../components/CustomButton";
 import { MdPeopleAlt, MdPerson } from "react-icons/md";
 import "../styles/Home.css";
 

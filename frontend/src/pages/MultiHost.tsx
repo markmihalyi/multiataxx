@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Navbar from "../layouts/Navbar";
 import Panel from "../components/Panel";
 
 function MultiHost() {
@@ -9,7 +9,7 @@ function MultiHost() {
 				<Panel
 					panelTitle="Set total time for turns & field size"
 					bgColor="panel-purple"
-					navLink="/room-hosted"
+					navLink="/game"
 					buttonText="Create Game"
 					dropdown={true}
 					options1={[

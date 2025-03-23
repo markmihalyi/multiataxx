@@ -14,7 +14,7 @@ export default function Navbar() {
 			<button className="btn" onClick={() => setIsPopupOpen(true)}>
 				Login
 			</button>
-			{isPopupOpen && <Popup onClose={() => setIsPopupOpen(false)} />}
+			<Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
 		</nav>
 	);
 }

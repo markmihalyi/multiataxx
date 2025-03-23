@@ -1,4 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+
 :root {
+	--popup-color: #01acc6;
+	--popup-hover-color: #0192a8;
+	--popup-border-color: #d3d0d6;
+	--popup-background-color: #e7e7e7;
 	-webkit-tap-highlight-color: transparent;
 	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;

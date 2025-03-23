@@ -26,12 +26,6 @@
 	font-size: 1.1rem;
 	appearance: textfield;
 }
-/* Remove the arrows from the input */
-.panel-container > input::-webkit-outer-spin-button,
-.panel-container > input::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
 
 h2 {
 	color: #ffffff;

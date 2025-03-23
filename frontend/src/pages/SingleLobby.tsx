@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Navbar from "../layouts/Navbar";
 import Panel from "../components/Panel";
 
 function SingleLobby() {
@@ -9,7 +9,7 @@ function SingleLobby() {
 				<Panel
 					panelTitle="Difficulty level & field size"
 					bgColor="panel-green"
-					navLink="/singleplayer"
+					navLink="/game"
 					buttonText="▶ Play"
 					dropdown={true}
 					options1={["Easy", "Medium", "Hard"]}
