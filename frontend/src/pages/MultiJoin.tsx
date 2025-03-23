@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Navbar from "../layouts/Navbar";
 import Panel from "../components/Panel";
 
 function MultiJoin() {
@@ -9,7 +9,7 @@ function MultiJoin() {
 				<Panel
 					panelTitle="Enter game code:"
 					bgColor="panel-teal"
-					navLink="/room-joined"
+					navLink="/game"
 					buttonText="Join Game"
 					dropdown={false}
 					options1={[]}

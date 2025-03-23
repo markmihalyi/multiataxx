@@ -1,7 +1,8 @@
+.hidden {
+	display: none;
+}
+
 .overlay {
-	--popup-color: #01acc6;
-	--popup-border-color: #d3d0d6;
-	--popup-background-color: #e7e7e7;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -12,6 +13,17 @@
 	height: 100%;
 	background: rgba(0, 0, 0, 0.5);
 	z-index: 11;
+	opacity: 1;
+	transition: opacity 0.3s ease-in-out;
+	pointer-events: none;
+}
+.fade-in {
+	opacity: 1;
+	pointer-events: auto;
+}
+.fade-out {
+	opacity: 0;
+	pointer-events: none;
 }
 
 .popup {
@@ -20,21 +32,31 @@
 	align-items: center;
 	position: relative;
 	gap: 1.2rem;
-	background: var(--popup-background-color);
+	background-color: var(--popup-background-color);
 	padding: 1.25rem;
 	border-radius: 0.5rem;
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	width: 300px;
+	width: 18.75rem;
 	text-align: center;
+	transform: translateY(0);
+	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.slide-in {
+	opacity: 1;
+	transform: translateY(0);
+}
+.slide-out {
+	opacity: 0;
+	transform: translateY(-20px);
 }
 
 .closeButton {
 	position: absolute;
-	top: 10px;
-	right: 10px;
+	top: 0.625rem;
+	right: 0.625rem;
 	background: none;
 	border: none;
-	font-size: 20px;
+	font-size: 1.25rem;
 	cursor: pointer;
 }
 
@@ -61,7 +83,16 @@
 	font-weight: lighter;
 }
 
-input {
+.login-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+}
+
+.login-form > input {
 	box-sizing: border-box;
 	width: 80%;
 	height: 2.5rem;
@@ -70,6 +101,16 @@ input {
 	border-radius: 4px;
 	font: inherit;
 	font-size: 0.9rem;
+}
+
+.login-form > p {
+	color: gray;
+	font-size: 0.8rem;
+	margin: 0.2rem 0rem;
+}
+
+.login-form > p > a {
+	color: var(--popup-color);
 }
 
 .loginButton {
@@ -84,7 +125,6 @@ input {
 	border-radius: 4px;
 	cursor: pointer;
 }
-
 .loginButton:hover {
-	background: #0192a8;
+	background: var(--popup-hover-color);
 }

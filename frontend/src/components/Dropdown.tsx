@@ -5,20 +5,12 @@ import "../styles/Dropdown.css";
 
 interface DropdownProps {
 	options: string[];
-	onSelect: (value: string) => void;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ options, onSelect }) => {
+const Dropdown: React.FC<DropdownProps> = ({ options }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [selected, setSelected] = useState<string | null>(options[0] || null);
 	const dropdownRef = useRef<HTMLDivElement>(null);
-
-	// Effect to call onSelect with the default selected option
-	useEffect(() => {
-		if (selected) {
-			onSelect(selected);
-		}
-	}, [selected, onSelect]);
 
 	// Toggle dropdown open/close
 	const toggleDropdown = () => setIsOpen((prev) => !prev);
@@ -26,7 +18,6 @@ const Dropdown: React.FC<DropdownProps> = ({ options, onSelect }) => {
 	// Handle option selection
 	const handleSelect = (option: string) => {
 		setSelected(option);
-		onSelect(option);
 		setIsOpen(false);
 	};
 
