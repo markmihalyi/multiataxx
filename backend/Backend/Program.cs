@@ -1,4 +1,5 @@
-﻿using Backend.Data;
+﻿using Backend;
+using Backend.Data;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    // appsettings.json kialakítása fejlesztői környezettől függően
+    // Fejlesztői környezettől függően appsettings.json kialakítása 
     if (!Debugger.IsAttached)
     {
         builder.Configuration.AddJsonFile(
@@ -22,9 +23,12 @@ var builder = WebApplication.CreateBuilder(args);
     // Adatbázis beállítása
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    // JWT authentikáció beállítása
-    string jwtKey = builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException("JWT Key is missing in configuration.");
-    string jwtIssuer = builder.Configuration["JWT:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is missing in configuration.");
+    // Token konfiguráció beolvasása, regisztrálása a DI konténerben
+    var tokenConfig = new TokenConfig();
+    builder.Configuration.GetSection("TokenSettings").Bind(tokenConfig);
+    builder.Services.Configure<TokenConfig>(builder.Configuration.GetSection("TokenSettings"));
+
+    // JWT authentikáció
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
@@ -34,8 +38,8 @@ var builder = WebApplication.CreateBuilder(args);
                 ValidateAudience = false,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtIssuer,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                ValidIssuer = tokenConfig.JwtIssuer,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfig.JwtSecret))
             };
 
             options.Events = new JwtBearerEvents
@@ -56,18 +60,22 @@ var builder = WebApplication.CreateBuilder(args);
             };
         });
 
+    // CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowSpecificOrigins", builder =>
-            {
-                builder.WithOrigins("http://localhost:5173") // frontend
-                       .AllowCredentials()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            });
+        {
+            builder.WithOrigins(tokenConfig.CorsFrontendOrigin)
+                .AllowCredentials()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
     });
 
+    // Services
     builder.Services.AddScoped<AuthService>();
+
+    // Controllers
     builder.Services.AddControllers()
         .ConfigureApiBehaviorOptions(options =>
         {
@@ -79,7 +87,6 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "MultiAtaxx", Version = "v1" });
-
         var xmlFile = "MultiAtaxx.API.xml";
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
@@ -94,6 +101,7 @@ var app = builder.Build();
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "MultiAtaxx");
     });
+
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseCors("AllowSpecificOrigins");
