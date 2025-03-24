@@ -13,7 +13,7 @@ function Register() {
 			<Navbar />
 			<div className="container" id="cont">
 				<div className="register-container">
-					<h2>Registration Form</h2>
+					<h2>Registration form</h2>
 					<form onSubmit={handleRegister} className="register-form">
 						<div className="input-group">
 							<label>Username:</label>
