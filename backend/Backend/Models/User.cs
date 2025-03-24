@@ -13,11 +13,10 @@ namespace Backend.Models
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
-        // Refresh token + lejárati dátum authentikációhoz
         public string? RefreshToken { get; set; }
+
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
-        // Egyéb adatok
         public int Balance { get; set; }
     }
 }
