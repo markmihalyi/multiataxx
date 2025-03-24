@@ -13,7 +13,7 @@ function SingleLobby() {
 					buttonText="▶ Play"
 					dropdown={true}
 					options1={["Easy", "Medium", "Hard"]}
-					options2={["Small (5x5)", "Medium (9x9)", "Large (11x11)"]}
+					options2={["Small (5x5)", "Medium (7x7)", "Large (9x9)"]}
 				/>
 			</div>
 		</>
