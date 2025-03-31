@@ -79,8 +79,7 @@ namespace Backend.GameLogic.Logic
 
         public (bool, GameResult?) CheckIfGameIsOver()
         {
-            int playerOneCellCount = 0;
-            int playerTwoCellCount = 0;
+            // Ellenőrzi, hogy tudnak-e lépni még a játékosok
             bool playerOneCanMove = false;
             bool playerTwoCanMove = false;
 
@@ -92,12 +91,10 @@ namespace Backend.GameLogic.Logic
 
                     if (cellState == CellState.Player1)
                     {
-                        playerOneCellCount++;
                         playerOneCanMove = playerOneCanMove || CanMove(i, j);
                     }
                     else if (cellState == CellState.Player2)
                     {
-                        playerTwoCellCount++;
                         playerTwoCanMove = playerTwoCanMove || CanMove(i, j);
                     }
 
@@ -109,25 +106,64 @@ namespace Backend.GameLogic.Logic
                 }
             }
 
-            // Játék vége állapotok ellenőrzése
-            if (!playerTwoCanMove && playerOneCellCount > playerTwoCellCount)
+            // Ha az egyik játékos nem tud már lépni, akkor az üres cellák a másik játékosé lesznek
+            if (playerOneCanMove && !playerTwoCanMove)
+            {
+                FillEmptyCells(CellState.Player1);
+            }
+            else if (!playerOneCanMove && playerTwoCanMove)
+            {
+                FillEmptyCells(CellState.Player2);
+            }
+
+            // Megszámolja a játékosok elfoglalt mezőinek számát
+            int playerOneCellCount = 0;
+            int playerTwoCellCount = 0;
+
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    var cellState = Cells[i, j];
+
+                    if (cellState == CellState.Player1)
+                    {
+                        playerOneCellCount++;
+                    }
+                    else if (cellState == CellState.Player2)
+                    {
+                        playerTwoCellCount++;
+                    }
+                }
+            }
+
+            // Játék végeredményének megállapítása az elfoglalt mezők száma alapján
+            if (playerOneCellCount > playerTwoCellCount)
             {
                 return (true, GameResult.Player1Won);
             }
 
-            if (!playerOneCanMove && playerOneCellCount < playerTwoCellCount)
+            if (playerOneCellCount < playerTwoCellCount)
             {
                 return (true, GameResult.Player2Won);
             }
 
-            if (!playerOneCanMove && !playerTwoCanMove && playerOneCellCount == playerTwoCellCount)
-            {
-                return (true, GameResult.Draw);
-            }
-
-            return (false, null);
+            return (true, GameResult.Draw);
         }
 
+        public void FillEmptyCells(CellState cellState)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    if (Cells[i, j] == CellState.Empty)
+                    {
+                        Cells[i, j] = cellState;
+                    }
+                }
+            }
+        }
 
         private bool IsValidCell(int x, int y) => x >= 0 && x < Size && y >= 0 && y < Size;
 
