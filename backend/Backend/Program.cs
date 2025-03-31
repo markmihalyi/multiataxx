@@ -74,6 +74,8 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Services
     builder.Services.AddScoped<AuthService>();
+    builder.Services.AddSingleton<GameService>();
+    builder.Services.AddSignalR();
 
     // Controllers
     builder.Services.AddControllers()
