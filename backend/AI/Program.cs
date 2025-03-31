@@ -13,10 +13,16 @@ class Program
         {
             Console.Clear();
             DisplayBoard(gameState.Board);
-
             // Ha ember lép, várunk egy lépést
             if (gameState.CurrentPlayer == 1)
             {
+                if (IsGameOver(gameState))
+                {
+                    Console.Clear();
+                    DisplayBoard(gameState.Board);
+                    Console.WriteLine("A játék véget ért!");
+                    break;
+                }
                 Console.WriteLine("Lépj!");
                 Console.Write("Adj meg egy lépést honnan lépsz (x y formátumban): ");
                 string input2 = Console.ReadLine();
@@ -29,7 +35,12 @@ class Program
                     && int.TryParse(parts[1], out int y) && parts2.Length == 2 && int.TryParse(parts2[0], out int fromx)
                     && int.TryParse(parts2[1], out int fromy))
                 {
-                    gameState.MakeMove(x, y, fromx, fromy);
+                    if (gameState.IsValidMove(x, y, fromx, fromy))
+                    {
+                        gameState.MakeMove(x, y, fromx, fromy);
+                        gameState.SwitchPlayer();
+                    }
+
                 }
                 else
                 {
@@ -41,16 +52,11 @@ class Program
             {
                 Console.WriteLine("Bot lép...");
                 botService.MakeBotMove();
+                gameState.SwitchPlayer(); 
             }
 
             // A játék vége ellenőrzése (egy egyszerű logika a végén)
-            if (IsGameOver(gameState))
-            {
-                Console.Clear();
-                DisplayBoard(gameState.Board);
-                Console.WriteLine("A játék véget ért!");
-                break;
-            }
+
         }
     }
 
@@ -70,10 +76,6 @@ class Program
     // Tábla tele van akkor vége
     static bool IsGameOver(GameState gameState)
     {
-        foreach (var cell in gameState.Board)
-        {
-            if (cell == 0) return false; // Ha van üres mező, még nem ért véget a játék
-        }
-        return true;
+        return gameState.GeneratePossibleMoves(1).Count() == 0 || gameState.GeneratePossibleMoves(2).Count()>0;
     }
 }
