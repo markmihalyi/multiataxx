@@ -38,6 +38,19 @@
 	width: 100%;
 }
 
+.register-form > p {
+	margin: 0;
+	align-self: center;
+	font-weight: bold;
+}
+
+.success {
+	color: green;
+}
+.error {
+	color: red;
+}
+
 .input-group {
 	display: flex;
 	flex-direction: column;

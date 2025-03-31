@@ -17,6 +17,7 @@
 	transition: opacity 0.3s ease-in-out;
 	pointer-events: none;
 }
+
 .fade-in {
 	opacity: 1;
 	pointer-events: auto;
@@ -26,7 +27,7 @@
 	pointer-events: none;
 }
 
-.popup {
+.login-popup {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -41,6 +42,48 @@
 	transform: translateY(0);
 	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
+
+.logout-popup {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	right: 0.8rem;
+	top: 3.6rem;
+	box-sizing: border-box;
+	width: 12rem;
+	height: 7rem;
+	border-radius: 0.5rem;
+	background-color: var(--popup-background-color);
+	box-shadow: -2px 2px 7px 3px rgba(0, 0, 0, 0.1);
+	transform: translateY(0);
+	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+	padding-bottom: 1rem;
+}
+
+.logout-popup-inner {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+	bottom: 30px;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 50%;
+	color: white;
+	font-size: 1.5rem;
+	background-color: var(--navbar-green);
+}
+
+.login-popup > a {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+
 .slide-in {
 	opacity: 1;
 	transform: translateY(0);
@@ -76,7 +119,7 @@
 	font-size: 2.5rem;
 }
 
-.popup > h2 {
+.login-popup > h2 {
 	color: var(--popup-color);
 	font: inherit;
 	font-size: 1.7rem;
@@ -109,12 +152,22 @@
 	margin: 0.2rem 0rem;
 }
 
+#errorMessage {
+	color: red;
+	font-size: 0.9rem;
+	font-weight: bold;
+	opacity: 1;
+	transition: opacity 0.5s ease-in-out;
+}
+
 .login-form > p > a {
 	color: var(--popup-color);
 }
 
-.loginButton {
+.w80 {
 	width: 80%;
+}
+.loginButton {
 	height: 2.3rem;
 	background: var(--popup-color);
 	color: white;
