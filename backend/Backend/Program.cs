@@ -1,5 +1,7 @@
 ﻿using Backend;
 using Backend.Data;
+using Backend.GameLogic.Serialization;
+using Backend.Hubs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -74,6 +76,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Services
     builder.Services.AddScoped<AuthService>();
+    builder.Services.AddSingleton<GameService>();
 
     // Controllers
     builder.Services.AddControllers()
@@ -91,6 +94,13 @@ var builder = WebApplication.CreateBuilder(args);
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
     });
+
+    // SignalR
+    builder.Services.AddSignalR()
+        .AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.Converters.Add(new CellStateArrayConverter());
+        });
 }
 
 var app = builder.Build();
@@ -107,6 +117,9 @@ var app = builder.Build();
     app.UseCors("AllowSpecificOrigins");
 
     app.MapControllers();
+
+    // SignalR route
+    app.MapHub<GameHub>("/game");
 }
 
 app.Run();
