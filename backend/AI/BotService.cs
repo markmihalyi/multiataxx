@@ -1,39 +1,46 @@
-﻿public class BotService
+﻿
+using System.Numerics;
+
+public class BotService
 {
     private GameState _gameState;
-
+    private Minimax _minimax;
     public BotService(GameState gameState)
     {
         _gameState = gameState;
+        _minimax = new Minimax(gameState, 3);
     }
 
     // Bot lépés generálása
     // Jelenleg csak random (egyszerű)
-    public (int x, int y) GenerateBotMove()
+    public (int x, int y, int fromx, int fromy) GenerateBotMove()
     {
-        Random rand = new Random();
-        int x, y;
+        // TODO: Booster metódus implementálása
 
-        // Keressünk egy érvényes lépést
-        do
-        {
-            x = rand.Next(0, 8); // 0 és 7 között random X pozíció
-            y = rand.Next(0, 8); 
-        } 
-        while (_gameState.Board[x, y] != 0 || !_gameState.IsValidMove(x, y)); 
-        // Ha nem üres a mező vagy érvénytelen lépés, próbálkozunk újra
-
-        return (x, y);
+        return (0, 0, 0, 0);
     }
+
 
     // Bot lépése végrehajtása és kiírása
     public void MakeBotMove()
     {
+        var move = _minimax.MaxMove(_gameState);
         // Generáljuk a bot lépését
-        var move = GenerateBotMove();
         int x = move.x;
         int y = move.y;
+        int fromx = move.fromx;
+        int fromy = move.fromy;
         // A bot lépése végrehajtása
-        _gameState.MakeMove(x, y);
+        // Ha a bot nem talált érvényes lépést
+        if (x == -1 && y == -1 && fromx == -1 && fromy == -1)
+        {
+            Console.WriteLine("A bot nem tudott lépni!");
+            return;
+        }
+
+        // A bot lépése végrehajtása
+        _gameState.MakeMove(x, y, fromx, fromy);
+        Console.WriteLine($"Bot moved from actually ({fromx}, {fromy}) to ({x}, {y})");
+        Thread.Sleep(2000);
     }
 }
