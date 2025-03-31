@@ -41,7 +41,7 @@ namespace Backend.Services
 
             string refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.Add(_tokenConfig.RefreshTokenExpiration);
             await _dbContext.SaveChangesAsync();
 
             return user;
