@@ -1,10 +1,13 @@
+import "../styles/Home.css";
+
 import { NavLink } from "react-router";
 import Navbar from "../layouts/Navbar";
 import CustomButton from "../components/CustomButton";
 import { MdPeopleAlt, MdPerson } from "react-icons/md";
-import "../styles/Home.css";
+import useAuth from "../common/hooks/useAuth";
 
 function Home() {
+	const { isLoggedIn } = useAuth();
 	return (
 		<>
 			<Navbar />
@@ -16,7 +19,11 @@ function Home() {
 						icon={<MdPerson className="button-icon" />}
 					/>
 				</NavLink>
-				<NavLink to="/multi-lobby" end>
+				<NavLink
+					to="/multi-lobby"
+					end
+					className={`${isLoggedIn ? "" : "disabled-link"}`}
+				>
 					<CustomButton
 						text="Multiplayer"
 						bgColor="button-blue"

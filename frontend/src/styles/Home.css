@@ -4,6 +4,12 @@
 	height: calc(100% - 4rem);
 }
 
+.disabled-link {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 @media (min-width: 768px) {
 	.container {
 		justify-content: center;

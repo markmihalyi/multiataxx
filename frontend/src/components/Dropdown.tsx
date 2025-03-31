@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import "../styles/Panel.css";
 import "../styles/Dropdown.css";
 
-interface DropdownProps {
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+
+type DropdownProps = {
 	options: string[];
-}
+};
 
 const Dropdown: React.FC<DropdownProps> = ({ options }) => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +39,6 @@ const Dropdown: React.FC<DropdownProps> = ({ options }) => {
 
 	return (
 		<div className="dropdown-ref" ref={dropdownRef}>
-			{/* Dropdown Button */}
 			<button className="dropdown-button" onClick={toggleDropdown}>
 				{selected}
 				<span className={`arrow ${isOpen ? "rotate-180" : ""}`}>▼</span>
