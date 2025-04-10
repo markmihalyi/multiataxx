@@ -8,7 +8,7 @@ public class BotService
     public BotService(GameState gameState)
     {
         _gameState = gameState;
-        _minimax = new Minimax(gameState, 5);
+        _minimax = new Minimax(gameState, 3);
     }
 
     // Bot lépés generálása

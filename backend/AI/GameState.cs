@@ -266,7 +266,7 @@ public class GameState
         }
         return possibleMoves;
     }
-    public void feltolt(int player)
+    public void Fill(int player)
     {
         for (int i = 0; i < N; i++)
         {
@@ -284,13 +284,13 @@ public class GameState
     {
         if(GeneratePossibleMoves(1).Count == 0)
         {
-            feltolt(2);
+            Fill(2);
 
             return true;
         }
         else if (GeneratePossibleMoves(2).Count == 0)
         {
-            feltolt(1);
+            Fill(1);
             return true;
         }
             return false;

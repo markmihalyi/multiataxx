@@ -55,7 +55,7 @@ class Program
                 gameState.SwitchPlayer(); 
             }
 
-            // A játék vége ellenőrzése (egy egyszerű logika a végén)
+            // TODO: A játék vége ellenőrzése (egy egyszerű logika a végén)
 
         }
     }
