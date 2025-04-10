@@ -1,4 +1,5 @@
 ﻿using Backend.GameLogic.Entities;
+using Backend.GameLogic.MapTemplates;
 using Backend.GameLogic.Serialization;
 using System.Text.Json.Serialization;
 
@@ -7,42 +8,31 @@ namespace Backend.GameLogic.Logic
     public class GameBoard
     {
         [JsonConverter(typeof(CellStateArrayConverter))]
-        public CellState[,] Cells { get; }
+        public CellState[,] Cells { get; private set; } = new CellState[0, 0];
 
         public int Size { get; }
 
         public GameBoard(BoardSize size)
         {
             Size = (int)size;
-            Cells = new CellState[Size, Size];
             InitializeBoard();
-        }
-
-        private bool IsStartingPosition(int i, int j)
-        {
-            return (i == 0 && j == 0) || (i == Size - 1 && j == Size - 1);
-        }
-
-        private CellState GetStartingPlayer(int i, int j)
-        {
-            return (i == 0 && j == 0) ? CellState.Player1 : CellState.Player2;
         }
 
         private void InitializeBoard()
         {
-            for (int i = 0; i < Size; i++)
+            switch (Size)
             {
-                for (int j = 0; j < Size; j++)
-                {
-                    if (IsStartingPosition(i, j))
-                    {
-                        Cells[i, j] = GetStartingPlayer(i, j);
-                    }
-                    else
-                    {
-                        Cells[i, j] = CellState.Empty;
-                    }
-                }
+                case (int)BoardSize.Small:
+                    Cells = PredefinedMaps.SmallMap;
+                    break;
+                case (int)BoardSize.Medium:
+                    Cells = PredefinedMaps.MediumMap;
+                    break;
+                case (int)BoardSize.Large:
+                    Cells = PredefinedMaps.LargeMap;
+                    break;
+                default:
+                    break;
             }
         }
 
