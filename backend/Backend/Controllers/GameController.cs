@@ -29,11 +29,16 @@ namespace Backend.Controllers
         {
             if (!Enum.TryParse<BoardSize>(body.BoardSize, true, out var boardSize))
             {
-                return BadRequest(new ErrorResponse("A megadott pályaméret érvénytelen."));
+                return BadRequest(new ErrorResponse("A pályaméret érvénytelen."));
+            }
+
+            if (body.TurnMinutes < 0.5 || body.TurnMinutes > 30)
+            {
+                return BadRequest(new ErrorResponse("A döntési idő érvénytelen."));
             }
 
             int userId = Convert.ToInt32(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
-            var gameCode = _gameService.CreateGame(userId, boardSize);
+            var gameCode = _gameService.CreateGame(userId, boardSize, body.TurnMinutes);
             if (gameCode == null)
             {
                 return Conflict(new ErrorResponse("Már van egy folyamatban lévő játékod."));

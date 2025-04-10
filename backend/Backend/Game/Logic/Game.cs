@@ -3,23 +3,25 @@ using Backend.Services;
 
 namespace Backend.GameLogic.Logic
 {
-    public class Game(GameService gameService, string gameCode, BoardSize boardSize)
+    public class Game(GameService gameService, string gameCode, BoardSize boardSize, double turnMinutes) : IDisposable
     {
         private readonly GameService _gameService = gameService;
-
         public string GameCode { get; } = gameCode;
-
         public GameBoard Board { get; } = new(boardSize);
 
         public Player?[] Players { get; } = new Player[2];
-
         public int PlayerCount => Players.Count(p => p != null);
+        private int FirstReadyPlayerId { get; set; } = -1;
 
         public GameState State { get; private set; } = GameState.Waiting;
 
-        public Player? Winner { get; private set; } = null;
+        private TimeSpan Player1TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
+        private TimeSpan Player2TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
 
-        private int FirstReadyPlayerId { get; set; } = -1;
+        private DateTime TurnStartTimeUtc { get; set; }
+        private Timer? _timeoutTimer { get; set; }
+
+        public Player? Winner { get; private set; } = null;
 
         public bool TryJoin(Player player)
         {
@@ -57,6 +59,8 @@ namespace Backend.GameLogic.Logic
 
             if (PlayerCount == 2 && otherPlayerIsReady)
             {
+                TurnStartTimeUtc = DateTime.UtcNow;
+                _timeoutTimer = new Timer(CheckTimeout, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
                 var firstPlayerIndex = FirstReadyPlayerId == Players[0]?.UserId ? 0 : 1;
                 await HandlePlayerTurnChange(firstPlayerIndex == 0 ? GameState.Player1Turn : GameState.Player2Turn);
             }
@@ -94,44 +98,60 @@ namespace Backend.GameLogic.Logic
 
         private async Task HandlePlayerTurnChange(GameState state)
         {
+            TimeSpan elapsedTime = DateTime.UtcNow - TurnStartTimeUtc;
+            if (State == GameState.Player1Turn)
+            {
+                Player1TimeRemaining -= elapsedTime;
+            }
+            else if (State == GameState.Player2Turn)
+            {
+                Player2TimeRemaining -= elapsedTime;
+            }
+
             State = state;
+            TurnStartTimeUtc = DateTime.UtcNow;
 
-            try
-            {
-                await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new GameData(State, Board.Cells));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in NotifyGroupAsync: {ex.Message}");
-            }
+            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new GameData(State, Board.Cells));
 
-            // -> DEBUG
-            Console.WriteLine($"State: {State}");
-            Board.Debug();
-            Console.WriteLine();
-            // <- DEBUG
+            Debug();
+        }
+
+        private void CheckTimeout(object? state)
+        {
+            TimeSpan elapsedTime = DateTime.UtcNow - TurnStartTimeUtc;
+
+            if (State == GameState.Player1Turn && elapsedTime >= Player1TimeRemaining)
+            {
+                Player1TimeRemaining = TimeSpan.Zero;
+                _ = HandleGameOver(GameResult.Player2Won);
+                _timeoutTimer?.Dispose();
+            }
+            else if (State == GameState.Player2Turn && elapsedTime >= Player2TimeRemaining)
+            {
+                Player2TimeRemaining = TimeSpan.Zero;
+                _ = HandleGameOver(GameResult.Player1Won);
+                _timeoutTimer?.Dispose();
+            }
         }
 
         private async Task HandleGameOver(GameResult result)
         {
             State = GameState.Ended;
-
-            try
-            {
-                await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in NotifyGroupAsync: {ex.Message}");
-            }
-
+            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells));
             await _gameService.RemoveGame(GameCode);
 
-            // -> DEBUG
+            Debug();
+        }
+
+        private void Debug()
+        {
             Console.WriteLine($"State: {State}");
             Board.Debug();
+            Console.WriteLine("Player1TimeRemaining: " + Math.Round(Player1TimeRemaining.TotalSeconds) + "s");
+            Console.WriteLine("Player2TimeRemaining: " + Math.Round(Player2TimeRemaining.TotalSeconds) + "s");
             Console.WriteLine();
-            // <- DEBUG
         }
+
+        public void Dispose() => _timeoutTimer?.Dispose();
     }
 }

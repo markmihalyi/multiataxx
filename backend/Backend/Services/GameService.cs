@@ -12,7 +12,7 @@ namespace Backend.Services
 
         private readonly ConcurrentDictionary<string, Game> Games = [];
 
-        public string? CreateGame(int userId, BoardSize boardSize)
+        public string? CreateGame(int userId, BoardSize boardSize, double turnMinutes)
         {
             var game = GetGameOfUser(userId);
             if (game != null)
@@ -26,7 +26,7 @@ namespace Backend.Services
                 gameCode = GenerateGameCode();
             }
 
-            var newGame = new Game(this, gameCode, boardSize);
+            var newGame = new Game(this, gameCode, boardSize, turnMinutes);
             Games.TryAdd(gameCode, newGame);
 
             return gameCode;
@@ -35,7 +35,12 @@ namespace Backend.Services
         public async Task<bool> RemoveGame(string gameCode)
         {
             await RemoveAllConnectionsFromGroup(gameCode);
-            return Games.TryRemove(gameCode, out _);
+            if (Games.TryRemove(gameCode, out var game))
+            {
+                game.Dispose();
+                return true;
+            }
+            return false;
         }
 
         public Game? GetGameOfUser(int userId)
