@@ -50,7 +50,7 @@ namespace Backend.Hubs
             var game = _gameService.GetGameOfUser(userId);
             if (game == null) return;
 
-            string status = await game.AttemptMove(userId, new Point(startRow, startColumn), new Point(destRow, destColumn));
+            string status = await game.AttemptMove(userId, new Point(startRow - 1, startColumn - 1), new Point(destRow - 1, destColumn - 1));
             if (status == "MoveCompleted") return;
 
             await Clients.Caller.SendAsync(status);
