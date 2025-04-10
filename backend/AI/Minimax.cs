@@ -16,7 +16,9 @@ public class Minimax
 
     public int MinimaxAlgorithm(GameState gameState, int depth, bool isMaxPlayer, int alpha, int beta)
     {
-        if (depth <= 0 || GameOver(gameState))
+        /*Program.DisplayBoard(gameState);
+        Thread.Sleep(1000);*/
+        if (depth <= 0 || gameState.IsGameOver())
         {
             return Evaluate(gameState);
         }
@@ -29,7 +31,7 @@ public class Minimax
             gameState.SwitchPlayer();
             foreach (var move in gameState.GeneratePossibleMoves(2))
             {
-                Console.WriteLine($"BOT Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
+                //Console.WriteLine($"BOT Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
                 GameState newState = gameState.Clone();
                 newState.MakeMove(move.x, move.y, move.fromx, move.fromy);
                 int eval = MinimaxAlgorithm(newState, depth - 1, !isMaxPlayer, alpha, beta);
@@ -38,7 +40,6 @@ public class Minimax
 
                 if (beta <= alpha)
                 {
-                    Console.WriteLine("KILÉP ALPHA");
                     break;  // Metszés
                 }
 
@@ -52,7 +53,7 @@ public class Minimax
             gameState.SwitchPlayer();
             foreach (var move in gameState.GeneratePossibleMoves(1))
             {
-                Console.WriteLine($"Játékos Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
+                //Console.WriteLine($"Játékos Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
                 GameState newState = gameState.Clone();
                 newState.MakeMove(move.x, move.y, move.fromx, move.fromy);
                 int eval = MinimaxAlgorithm(newState, depth - 1, !isMaxPlayer, alpha, beta);
@@ -61,7 +62,6 @@ public class Minimax
 
                 if (beta <= alpha)
                 {
-                    Console.WriteLine("KILÉP BETA");
                     break;  // Metszés
                 }
 
@@ -85,7 +85,7 @@ public class Minimax
                 maxEval = eval;
                 bestMove = move;
                 Console.WriteLine($"Frissített maxEval: {maxEval}, Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
-                Thread.Sleep(2000);
+                //Thread.Sleep(1000);
             }
         }
 
@@ -93,27 +93,41 @@ public class Minimax
 }
 
 
-    public Boolean GameOver(GameState gameState)
-    {
-        if (gameState.GeneratePossibleMoves(1).Count() == 0 || gameState.GeneratePossibleMoves(2).Count() == 0)
-        {
-            Console.WriteLine("Game Over állapot elérve!");
-            return true;
-        }
-        return false;
-    }
-    // Lehetséges lépések generálása
-   
-
 
     // Kiértékelő
+
+
     private int Evaluate(GameState gameState)
     {
-        // TODO: Jobb kiértékelő függvény 
-        int botScore = gameState.GetPlayerPieces(2).Count();
-        int playerScore = gameState.GetPlayerPieces(1).Count();
+        int botScore = gameState.GetPlayerPiecesCount(2);
+        int playerScore = gameState.GetPlayerPiecesCount(1);
 
-        return botScore - playerScore;
+        // Pozíció-alapú értékelés
+        int botPositionAdvantage = 0;
+        foreach (var (x, y) in gameState.GetPlayerPieces(2))
+        {
+            if (x >= 3 && x <= 5 && y >= 3 && y <= 5) // középső sáv
+            {
+                botPositionAdvantage += 3; // Több pont a középső mezőn lévő bábukért
+            }
+        }
+
+        int playerPositionAdvantage = 0;
+        foreach (var (x, y) in gameState.GetPlayerPieces(1))
+        {
+            if (x >= 3 && x <= 5 && y >= 3 && y <= 5)
+            {
+                playerPositionAdvantage += 3;
+            }
+        }
+        
+        // Mozgási lehetőségek (mobilitás)
+        int botMoves = gameState.GeneratePossibleMovesCount(2);
+        int playerMoves = gameState.GeneratePossibleMovesCount(1);
+
+        // Súlyozott értékelés
+        return (10 * botScore + 5 * botPositionAdvantage + 2 * botMoves) -
+               (10 * playerScore + 5 * playerPositionAdvantage + 2 * playerMoves);
     }
 
 }

@@ -8,7 +8,7 @@ public class BotService
     public BotService(GameState gameState)
     {
         _gameState = gameState;
-        _minimax = new Minimax(gameState, 3);
+        _minimax = new Minimax(gameState, 5);
     }
 
     // Bot lépés generálása
@@ -20,7 +20,7 @@ public class BotService
         return (0, 0, 0, 0);
     }
 
-
+    
     // Bot lépése végrehajtása és kiírása
     public void MakeBotMove()
     {
@@ -41,6 +41,7 @@ public class BotService
         // A bot lépése végrehajtása
         _gameState.MakeMove(x, y, fromx, fromy);
         Console.WriteLine($"Bot moved from actually ({fromx}, {fromy}) to ({x}, {y})");
-        Thread.Sleep(2000);
+        //Thread.Sleep(2000);
     }
+
 }

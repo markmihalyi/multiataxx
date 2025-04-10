@@ -12,14 +12,14 @@ class Program
         while (true)
         {
             Console.Clear();
-            DisplayBoard(gameState.Board);
+            DisplayBoard(gameState);
             // Ha ember lép, várunk egy lépést
             if (gameState.CurrentPlayer == 1)
             {
-                if (IsGameOver(gameState))
+                if (gameState.IsGameOver())
                 {
                     Console.Clear();
-                    DisplayBoard(gameState.Board);
+                    DisplayBoard(gameState);
                     Console.WriteLine("A játék véget ért!");
                     break;
                 }
@@ -45,7 +45,7 @@ class Program
                 else
                 {
                     Console.WriteLine("Érvénytelen lépés. Próbáld újra.");
-                    Thread.Sleep(2000);
+                    //Thread.Sleep(1000);
                 }
             }
             else
@@ -61,21 +61,18 @@ class Program
     }
 
     // A tábla kirajzolása
-    static void DisplayBoard(int[,] board)
+    public static void DisplayBoard(GameState gameState)
     {
-        for (int i = 0; i < 8; i++)
+        
+        for (int i = 0; i < GameState.N; i++)
         {
-            for (int j = 0; j < 8; j++)
+            for (int j = 0; j < GameState.N; j++)
             {
-                char symbol = board[i, j] == 0 ? '.' : board[i, j] == 1 ? '1' : '2';
+                char symbol = gameState.Board[i, j] == 0 ? '.' : gameState.Board[i, j] == 1 ? '1' : gameState.Board[i, j] == 2 ? '2' : 'X';
                 Console.Write(symbol + " ");
             }
             Console.WriteLine();
         }
     }
-    // Tábla tele van akkor vége
-    static bool IsGameOver(GameState gameState)
-    {
-        return gameState.GeneratePossibleMoves(1).Count() == 0 || gameState.GeneratePossibleMoves(2).Count()>0;
-    }
+
 }
