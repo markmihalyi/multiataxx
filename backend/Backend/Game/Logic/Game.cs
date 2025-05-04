@@ -137,7 +137,11 @@ namespace Backend.GameLogic.Logic
         private async Task HandleGameOver(GameResult result)
         {
             State = GameState.Ended;
+            Winner = result == GameResult.Player1Won ? Players[0] : result == GameResult.Player2Won ? Players[1] : null;
             await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells));
+            Console.WriteLine("Saving match data...");
+            await _gameService.SaveMatchData(gameCode);
+            Console.WriteLine("Match data saved!");
             await _gameService.RemoveGame(GameCode);
 
             Debug();

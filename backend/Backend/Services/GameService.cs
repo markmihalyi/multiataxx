@@ -1,14 +1,17 @@
-﻿using Backend.GameLogic.Entities;
+﻿using Backend.Data;
+using Backend.GameLogic.Entities;
 using Backend.GameLogic.Logic;
 using Backend.Hubs;
+using Backend.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 
 namespace Backend.Services
 {
-    public class GameService(IHubContext<GameHub> hubContext)
+    public class GameService(IHubContext<GameHub> hubContext, IServiceScopeFactory scopeFactory)
     {
         private readonly IHubContext<GameHub> _hubContext = hubContext;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
         private readonly ConcurrentDictionary<string, Game> Games = [];
 
@@ -83,10 +86,68 @@ namespace Backend.Services
             await _hubContext.Clients.Group(gameCode).SendAsync(eventName, data);
         }
 
+        public async Task SaveMatchData(string gameCode)
+        {
+            try
+            {
+                if (!Games.TryGetValue(gameCode, out var game) || game.PlayerCount != 2)
+                {
+                    Console.WriteLine("Game not found or player count is not 2.");
+                    return;
+                }
+
+                using var scope = _scopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                // DEBUG
+                //Console.WriteLine("game.Board.Steps");
+                //for (int index = 0; index < game.Board.Steps.Count; index++)
+                //{
+                //    Console.WriteLine($"Matrix {index + 1}:");
+
+                //    var board = game.Board.Steps[index];
+                //    int rows = board.GetLength(0);
+                //    int cols = board.GetLength(1);
+
+                //    for (int i = 0; i < rows; i++)
+                //    {
+                //        List<string> rowValues = new List<string>();
+                //        for (int j = 0; j < cols; j++)
+                //        {
+                //            // Enum -> int konverzió
+                //            rowValues.Add(((int)board[i, j]).ToString());
+                //        }
+                //        Console.WriteLine(string.Join(" ", rowValues));
+                //    }
+
+                //    Console.WriteLine(); // Üres sor két mátrix között
+                //}
+                // DEBUG
+
+                var matchData = new Match()
+                {
+                    Id = Guid.NewGuid(),
+                    PlayerOneUserId = game.Players[0]?.UserId ?? -1,
+                    PlayerTwoUserId = game.Players[1]?.UserId ?? -1,
+                    WinnerUserId = game.Winner?.UserId,
+                    Steps = game.Board.Steps
+                };
+
+                dbContext.Matches.Add(matchData);
+                Console.WriteLine("Saving match data to the database...");
+                await dbContext.SaveChangesAsync();
+                Console.WriteLine("Match data saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while saving match data: {ex.Message}");
+            }
+        }
+
+
         private async Task RemoveAllConnectionsFromGroup(string gameCode)
         {
-            var game = Games[gameCode];
-            if (game == null) return;
+            if (!Games.TryGetValue(gameCode, out var game)) return;
 
             foreach (var player in game.Players)
             {

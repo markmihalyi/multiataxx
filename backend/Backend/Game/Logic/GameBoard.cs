@@ -9,6 +9,7 @@ namespace Backend.GameLogic.Logic
     {
         [JsonConverter(typeof(CellStateArrayConverter))]
         public CellState[,] Cells { get; private set; } = new CellState[0, 0];
+        public List<CellState[,]> Steps { get; } = [];
 
         public int Size { get; }
 
@@ -16,6 +17,7 @@ namespace Backend.GameLogic.Logic
         {
             Size = (int)size;
             InitializeBoard();
+            Steps.Add((CellState[,])Cells.Clone());
         }
 
         private void InitializeBoard()
@@ -65,6 +67,8 @@ namespace Backend.GameLogic.Logic
                     }
                 }
             }
+
+            Steps.Add((CellState[,])Cells.Clone());
         }
 
         public (bool, GameResult?) CheckIfGameIsOver()
