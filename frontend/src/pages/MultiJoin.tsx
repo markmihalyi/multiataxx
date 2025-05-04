@@ -12,6 +12,7 @@ function MultiJoin() {
 					navLink="/game"
 					buttonText="Join Game"
 					dropdown={false}
+					canDisable={true}
 					options1={[]}
 					options2={[]}
 				/>
