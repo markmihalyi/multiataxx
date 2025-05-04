@@ -1,12 +1,12 @@
 import "../styles/Popup.css";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-import { FaUser } from "react-icons/fa6";
 import { FaUnlockAlt } from "react-icons/fa";
+import { FaUser } from "react-icons/fa6";
 import { NavLink } from "react-router";
-import api from "../axios";
-import { handleAxiosError } from "../axios";
+import api from "../api";
+import { handleAxiosError } from "../api";
 import useAuth from "../common/hooks/useAuth";
 
 interface PopupProps {

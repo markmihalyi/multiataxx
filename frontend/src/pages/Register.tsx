@@ -1,12 +1,11 @@
 import "../styles/Register.css";
 
-import { useState } from "react";
-
-import Navbar from "../layouts/Navbar";
 import { IoMdLock } from "react-icons/io";
 import { MdPerson } from "react-icons/md";
-import api from "../axios";
-import { handleAxiosError } from "../axios";
+import Navbar from "../layouts/Navbar";
+import api from "../api";
+import { handleAxiosError } from "../api";
+import { useState } from "react";
 
 function Register() {
 	const [username, setUsername] = useState("");

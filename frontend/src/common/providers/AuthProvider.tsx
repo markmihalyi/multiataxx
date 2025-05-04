@@ -1,4 +1,5 @@
-import { createContext, useState } from "react";
+import api, { handleAxiosError } from "../../api";
+import { createContext, useEffect, useState } from "react";
 
 export interface IAuthContext {
 	isLoggedIn: boolean;
@@ -12,6 +13,21 @@ const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 const AuthContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [permanentUsername, setPermanentUsername] = useState("");
+
+	useEffect(() => {
+		async function fetchData() {
+			try {
+				const { status } = await api.post("/api/auth/refresh");
+				if (status === 200) {
+					setIsLoggedIn(true);
+				}
+			} catch (error) {
+				const errorData: ApiResponse = handleAxiosError(error);
+				console.log("Error:", errorData.message);
+			}
+		}
+		fetchData();
+	}, []);
 
 	return (
 		<AuthContext.Provider
