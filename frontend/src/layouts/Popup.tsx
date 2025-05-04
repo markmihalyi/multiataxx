@@ -21,6 +21,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [inputError, setInputError] = useState<boolean>(false);
 
 	const { isLoggedIn, setIsLoggedIn } = useAuth();
 
@@ -44,10 +45,12 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 		} catch (error) {
 			const errorData: ApiResponse = handleAxiosError(error);
 			setErrorMessage(errorData.message);
+			setInputError(true);
 
 			setTimeout(() => {
 				setErrorMessage(null);
-			}, 3000);
+				setInputError(false);
+			}, 1500);
 		}
 	};
 
@@ -125,6 +128,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					<h2>Hi there!</h2>
 					<form onSubmit={handleLogin} className="login-form">
 						<input
+							className={`${inputError ? "inputError" : ""}`}
 							type="text"
 							value={username}
 							onInput={(e) => setUsername(e.currentTarget.value)}
@@ -133,6 +137,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 							required
 						/>
 						<input
+							className={`${inputError ? "inputError" : ""}`}
 							type="password"
 							value={password}
 							onInput={(e) => setPassword(e.currentTarget.value)}
@@ -140,18 +145,19 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 							autoComplete="current-password"
 							required
 						/>
-						{errorMessage && (
-							<p id="errorMessage">{errorMessage}</p>
-						)}
 						<button type="submit" className="loginButton w80">
 							Login
 						</button>
-						<p>
-							No account yet?{" "}
-							<NavLink to="/register" id="register-link" end>
-								Register here!
-							</NavLink>
-						</p>
+						{errorMessage ? (
+							<p id="errorMessage">{errorMessage}</p>
+						) : (
+							<p>
+								No account yet?{" "}
+								<NavLink to="/register" id="register-link" end>
+									Register here!
+								</NavLink>
+							</p>
+						)}
 					</form>
 				</div>
 			</div>

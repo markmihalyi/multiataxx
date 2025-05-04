@@ -27,6 +27,11 @@
 	appearance: textfield;
 }
 
+.panel-container > input.inputError {
+	color: red;
+	animation: shake 0.3s;
+}
+
 h2 {
 	color: #ffffff;
 	font-size: 1.5rem;

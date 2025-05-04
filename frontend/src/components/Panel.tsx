@@ -41,6 +41,7 @@ const Panel: React.FC<PanelProps> = ({
 	);
 
 	const [gameCode, setGameCode] = useState<string>("");
+	const [inputError, setInputError] = useState<boolean>(false);
 
 	const handleHostGame = async () => {
 		let turnMinutes = 0;
@@ -81,7 +82,11 @@ const Panel: React.FC<PanelProps> = ({
 	};
 
 	const handleJoinGame = () => {
-		if (!gameCode || gameCode.length !== 8) return;
+		if (!gameCode || gameCode.length !== 8) {
+			setInputError(true);
+			setTimeout(() => setInputError(false), 1000);
+			return;
+		}
 		navigate(`/game?code=${gameCode}`);
 	};
 
@@ -102,8 +107,8 @@ const Panel: React.FC<PanelProps> = ({
 					/>
 				</div>
 				<button
-					className={`panel-button${
-						!isLoggedIn ? " disabled-link" : ""
+					className={`panel-button ${
+						!isLoggedIn ? "disabled-link" : ""
 					}`}
 					onClick={handleHostGame}
 					disabled={!isLoggedIn}
@@ -138,14 +143,15 @@ const Panel: React.FC<PanelProps> = ({
 			<div className={`panel-container ${bgColor}`}>
 				<h2>{panelTitle}</h2>
 				<input
+					className={`${inputError ? "inputError" : ""}`}
 					type="text"
 					value={gameCode}
 					onChange={(e) => setGameCode(e.currentTarget.value)}
 					placeholder="xxxxxxxx"
 				></input>
 				<button
-					className={`panel-button${
-						!isLoggedIn ? " disabled-link" : ""
+					className={`panel-button ${
+						!isLoggedIn ? "disabled-link" : ""
 					}`}
 					onClick={handleJoinGame}
 					disabled={!isLoggedIn}
