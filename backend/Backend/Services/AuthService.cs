@@ -10,10 +10,10 @@ using System.Text;
 
 namespace Backend.Services
 {
-    public class AuthService(IOptions<TokenConfig> tokenConfig, AppDbContext context)
+    public class AuthService(IOptions<TokenConfig> tokenConfig, AppDbContext dbContext)
     {
         private readonly TokenConfig _tokenConfig = tokenConfig.Value;
-        private readonly AppDbContext _dbContext = context;
+        private readonly AppDbContext _dbContext = dbContext;
 
         public async Task<bool> RegisterUser(string username, string password)
         {

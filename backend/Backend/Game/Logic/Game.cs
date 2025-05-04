@@ -3,10 +3,9 @@ using Backend.Services;
 
 namespace Backend.GameLogic.Logic
 {
-    public class Game(GameService gameService, string gameCode, BoardSize boardSize, double turnMinutes) : IDisposable
+    public class Game(GameService gameService, string GameCode, BoardSize boardSize, double turnMinutes) : IDisposable
     {
         private readonly GameService _gameService = gameService;
-        public string GameCode { get; } = gameCode;
         public GameBoard Board { get; } = new(boardSize);
 
         public Player?[] Players { get; } = new Player[2];
@@ -140,7 +139,7 @@ namespace Backend.GameLogic.Logic
             Winner = result == GameResult.Player1Won ? Players[0] : result == GameResult.Player2Won ? Players[1] : null;
             await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells));
             Console.WriteLine("Saving match data...");
-            await _gameService.SaveMatchData(gameCode);
+            await _gameService.SaveMatchData(GameCode);
             Console.WriteLine("Match data saved!");
             await _gameService.RemoveGame(GameCode);
 
