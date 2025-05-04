@@ -73,7 +73,7 @@ namespace Backend.Services
                 }
             }
 
-            return new InitialGameData(ownPlayerId, otherPlayerName, game.State, game.Board.Cells);
+            return new InitialGameData(ownPlayerId, otherPlayerName, game.State, game.Board.Cells, [(int)game.Player1TimeRemaining.TotalSeconds, (int)game.Player2TimeRemaining.TotalSeconds]);
         }
 
         public bool TryJoinRoom(string gameCode, Player player)

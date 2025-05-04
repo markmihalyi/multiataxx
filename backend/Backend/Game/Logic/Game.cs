@@ -14,8 +14,8 @@ namespace Backend.GameLogic.Logic
 
         public GameState State { get; private set; } = GameState.Waiting;
 
-        private TimeSpan Player1TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
-        private TimeSpan Player2TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
+        public TimeSpan Player1TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
+        public TimeSpan Player2TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
 
         private DateTime TurnStartTimeUtc { get; set; }
         private Timer? _timeoutTimer { get; set; }
@@ -110,7 +110,7 @@ namespace Backend.GameLogic.Logic
             State = state;
             TurnStartTimeUtc = DateTime.UtcNow;
 
-            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new GameData(State, Board.Cells));
+            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new GameData(State, Board.Cells, [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds]));
 
             Debug();
         }
@@ -137,7 +137,7 @@ namespace Backend.GameLogic.Logic
         {
             State = GameState.Ended;
             Winner = result == GameResult.Player1Won ? Players[0] : result == GameResult.Player2Won ? Players[1] : null;
-            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells));
+            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells, [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds]));
             Console.WriteLine("Saving match data...");
             await _gameService.SaveMatchData(GameCode);
             Console.WriteLine("Match data saved!");
