@@ -20,7 +20,12 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 	const [password, setPassword] = useState("");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	const { isLoggedIn, setIsLoggedIn } = useAuth();
+	const {
+		isLoggedIn,
+		setIsLoggedIn,
+		permanentUsername,
+		setPermanentUsername,
+	} = useAuth();
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault(); //prevent reloading
@@ -30,6 +35,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 				username,
 				password,
 			});
+			setPermanentUsername(username);
 			setUsername("");
 			setPassword("");
 			setErrorMessage(null);
@@ -54,6 +60,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 			setIsOpen(false);
 
 			setTimeout(() => {
+				setPermanentUsername("");
 				setIsLoggedIn(false);
 			}, 320);
 		} catch (error) {
@@ -169,9 +176,13 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					<button className="closeButton" onClick={handleClose}>
 						&times;
 					</button>
-					<div className="logout-popup-inner">
+					<div className="logout-popup-circle">
 						<FaUnlockAlt />
 					</div>
+					<p>User logged in:</p>
+					<p id="p-bottom">
+						<b>{permanentUsername}</b>
+					</p>
 					<NavLink to="/" end>
 						<button className="loginButton" onClick={handleLogOut}>
 							Log out

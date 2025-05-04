@@ -52,8 +52,8 @@
 	right: 0.8rem;
 	top: 3.6rem;
 	box-sizing: border-box;
-	width: 12rem;
-	height: 7rem;
+	width: 15rem;
+	height: 10rem;
 	border-radius: 0.5rem;
 	background-color: var(--popup-background-color);
 	box-shadow: -2px 2px 7px 3px rgba(0, 0, 0, 0.1);
@@ -62,19 +62,31 @@
 	padding-bottom: 1rem;
 }
 
-.logout-popup-inner {
+.logout-popup-circle {
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
 	position: relative;
-	bottom: 30px;
+	bottom: 1.2rem;
 	width: 3rem;
 	height: 3rem;
 	border-radius: 50%;
 	color: white;
 	font-size: 1.5rem;
 	background-color: var(--navbar-green);
+}
+
+.logout-popup > p {
+	margin: 0;
+	color: black;
+	position: relative;
+	bottom: 0.4rem;
+}
+
+#p-bottom {
+	margin-top: 0.1rem;
+	margin-bottom: 0.6rem;
 }
 
 .login-popup > a {
