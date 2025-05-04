@@ -6,11 +6,16 @@ import { useEffect, useRef, useState } from "react";
 
 type DropdownProps = {
 	options: string[];
+	selected: string | null;
+	setSelected: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-const Dropdown: React.FC<DropdownProps> = ({ options }) => {
+const Dropdown: React.FC<DropdownProps> = ({
+	options,
+	selected,
+	setSelected,
+}) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const [selected, setSelected] = useState<string | null>(options[0] || null);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	// Toggle dropdown open/close

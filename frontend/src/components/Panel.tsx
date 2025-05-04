@@ -1,7 +1,11 @@
-import { NavLink } from "react-router";
-import Dropdown from "../components/Dropdown";
 import "../styles/Panel.css";
+
+import api, { handleAxiosError } from "../api";
+
+import Dropdown from "../components/Dropdown";
 import useAuth from "../common/hooks/useAuth";
+import { useNavigate } from "react-router";
+import { useState } from "react";
 
 type PanelProps = {
 	panelTitle: string;
@@ -17,7 +21,6 @@ type PanelProps = {
 const Panel: React.FC<PanelProps> = ({
 	panelTitle,
 	bgColor,
-	navLink,
 	buttonText,
 	dropdown,
 	canDisable,
@@ -25,21 +28,86 @@ const Panel: React.FC<PanelProps> = ({
 	options2,
 }) => {
 	const { isLoggedIn } = useAuth();
+	const navigate = useNavigate();
+
+	const [selectedTime, setSelectedTime] = useState<string | null>(
+		options1[0] || null
+	);
+	const [selectedBoardSize, setSelectedBoardSize] = useState<string | null>(
+		options2[0] || null
+	);
+	const [difficultyLevel, setDifficultyLevel] = useState<string | null>(
+		options1[0] || null
+	);
+
+	const [gameCode, setGameCode] = useState<string>("");
+
+	const handleHostGame = async () => {
+		let turnMinutes = 0;
+		const timeData = selectedTime?.split(":") || ["0", "30"];
+		turnMinutes += Number(timeData[0]);
+		turnMinutes += Number(timeData[1]) / 60;
+
+		let boardSize = "";
+		switch (selectedBoardSize) {
+			case "Small (5x5)":
+				boardSize = "small";
+				break;
+			case "Medium (7x7)":
+				boardSize = "medium";
+				break;
+			case "Large (9x9)":
+				boardSize = "large";
+				break;
+			default:
+				break;
+		}
+
+		try {
+			const { status, data } = await api.post<HostGameApiResponse>(
+				"/api/game",
+				{
+					boardSize,
+					turnMinutes,
+				}
+			);
+			if (status === 200) {
+				navigate(`/game?code=${data.gameCode}`);
+			}
+		} catch (error) {
+			const errorData: ApiResponse = handleAxiosError(error);
+			console.log("Error:", errorData.message);
+		}
+	};
+
+	const handleJoinGame = () => {
+		if (!gameCode || gameCode.length !== 8) return;
+		navigate(`/game?code=${gameCode}`);
+	};
+
 	if (dropdown && canDisable) {
 		return (
 			<div className={`panel-container ${bgColor}`}>
 				<h2>{panelTitle}</h2>
 				<div className="dropdown-container">
-					<Dropdown options={options1} />
-					<Dropdown options={options2} />
+					<Dropdown
+						options={options1}
+						selected={selectedTime}
+						setSelected={setSelectedTime}
+					/>
+					<Dropdown
+						options={options2}
+						selected={selectedBoardSize}
+						setSelected={setSelectedBoardSize}
+					/>
 				</div>
-				<NavLink
-					to={`${navLink}`}
-					end
-					className={`${isLoggedIn ? "" : "disabled-link"}`}
+				<button
+					className="panel-button"
+					onClick={handleHostGame}
+					disabled={!isLoggedIn}
 				>
-					<button className="panel-button">{buttonText}</button>
-				</NavLink>
+					{buttonText}
+				</button>
 			</div>
 		);
 	} else if (dropdown && !canDisable) {
@@ -47,26 +115,43 @@ const Panel: React.FC<PanelProps> = ({
 			<div className={`panel-container ${bgColor}`}>
 				<h2>{panelTitle}</h2>
 				<div className="dropdown-container">
-					<Dropdown options={options1} />
-					<Dropdown options={options2} />
+					<Dropdown
+						options={options1}
+						selected={difficultyLevel}
+						setSelected={setDifficultyLevel}
+					/>
+					<Dropdown
+						options={options2}
+						selected={selectedBoardSize}
+						setSelected={setSelectedBoardSize}
+					/>
 				</div>
-				<NavLink to={`${navLink}`} end>
-					<button className="panel-button">{buttonText}</button>
-				</NavLink>
+				<button
+					className="panel-button"
+					onClick={handleHostGame}
+					disabled={!isLoggedIn}
+				>
+					{buttonText}
+				</button>
 			</div>
 		);
 	} else {
 		return (
 			<div className={`panel-container ${bgColor}`}>
 				<h2>{panelTitle}</h2>
-				<input type="text" placeholder="xxxxxxxx"></input>
-				<NavLink
-					to={`${navLink}`}
-					end
-					className={`${isLoggedIn ? "" : "disabled-link"}`}
+				<input
+					type="text"
+					value={gameCode}
+					onChange={(e) => setGameCode(e.currentTarget.value)}
+					placeholder="xxxxxxxx"
+				></input>
+				<button
+					className="panel-button"
+					onClick={handleJoinGame}
+					disabled={!isLoggedIn}
 				>
-					<button className="panel-button">{buttonText}</button>
-				</NavLink>
+					{buttonText}
+				</button>
 			</div>
 		);
 	}
