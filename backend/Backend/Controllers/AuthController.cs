@@ -31,12 +31,12 @@ public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authS
     {
         if (body.Username.Length < 3 || body.Username.Length > 20)
         {
-            return BadRequest(new ErrorResponse("The username can be a minimum of 3 and a maximum of 20 characters."));
+            return BadRequest(new ErrorResponse("Username should be between 3 and 20 characters."));
         }
 
         if (body.Password.Length < 6 || body.Password.Length > 32)
         {
-            return BadRequest(new ErrorResponse("The password can be a minimum of 6 and a maximum of 32 characters."));
+            return BadRequest(new ErrorResponse("Password should be between 6 and 32 characters."));
         }
 
         bool success = await _authService.RegisterUser(body.Username, body.Password);
