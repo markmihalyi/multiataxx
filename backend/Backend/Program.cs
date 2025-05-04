@@ -112,9 +112,9 @@ var app = builder.Build();
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "MultiAtaxx");
     });
 
+    app.UseCors("AllowSpecificOrigins");
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseCors("AllowSpecificOrigins");
 
     app.MapControllers();
 
