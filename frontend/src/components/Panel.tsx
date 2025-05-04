@@ -102,7 +102,9 @@ const Panel: React.FC<PanelProps> = ({
 					/>
 				</div>
 				<button
-					className="panel-button"
+					className={`panel-button${
+						!isLoggedIn ? " disabled-link" : ""
+					}`}
 					onClick={handleHostGame}
 					disabled={!isLoggedIn}
 				>
@@ -126,11 +128,7 @@ const Panel: React.FC<PanelProps> = ({
 						setSelected={setSelectedBoardSize}
 					/>
 				</div>
-				<button
-					className="panel-button"
-					onClick={handleHostGame}
-					disabled={!isLoggedIn}
-				>
+				<button className="panel-button" onClick={handleHostGame}>
 					{buttonText}
 				</button>
 			</div>
@@ -146,7 +144,9 @@ const Panel: React.FC<PanelProps> = ({
 					placeholder="xxxxxxxx"
 				></input>
 				<button
-					className="panel-button"
+					className={`panel-button${
+						!isLoggedIn ? " disabled-link" : ""
+					}`}
 					onClick={handleJoinGame}
 					disabled={!isLoggedIn}
 				>

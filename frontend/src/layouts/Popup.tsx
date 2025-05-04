@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { FaUnlockAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import api from "../api";
 import { handleAxiosError } from "../api";
 import useAuth from "../common/hooks/useAuth";
@@ -15,17 +15,14 @@ interface PopupProps {
 }
 
 const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
+	const navigate = useNavigate();
+
 	const [isVisible, setIsVisible] = useState(false);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	const {
-		isLoggedIn,
-		setIsLoggedIn,
-		permanentUsername,
-		setPermanentUsername,
-	} = useAuth();
+	const { isLoggedIn, setIsLoggedIn } = useAuth();
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault(); //prevent reloading
@@ -35,7 +32,6 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 				username,
 				password,
 			});
-			setPermanentUsername(username);
 			setUsername("");
 			setPassword("");
 			setErrorMessage(null);
@@ -43,6 +39,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 
 			setTimeout(() => {
 				setIsLoggedIn(true);
+				navigate("/");
 			}, 320);
 		} catch (error) {
 			const errorData: ApiResponse = handleAxiosError(error);
@@ -60,8 +57,8 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 			setIsOpen(false);
 
 			setTimeout(() => {
-				setPermanentUsername("");
 				setIsLoggedIn(false);
+				navigate("/");
 			}, 320);
 		} catch (error) {
 			const errorData: ApiResponse = handleAxiosError(error);
@@ -181,13 +178,11 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					</div>
 					<p>User logged in:</p>
 					<p id="p-bottom">
-						<b>{permanentUsername}</b>
+						<b>bob</b>
 					</p>
-					<NavLink to="/" end>
-						<button className="loginButton" onClick={handleLogOut}>
-							Log out
-						</button>
-					</NavLink>
+					<button className="loginButton" onClick={handleLogOut}>
+						Log out
+					</button>
 				</div>
 			</div>
 		);

@@ -14,7 +14,7 @@ function Home() {
 			<div className="container">
 				<NavLink to="/single-lobby" end>
 					<CustomButton
-						text="Single player"
+						text="Single Player"
 						bgColor="button-green"
 						icon={<MdPerson className="button-icon" />}
 					/>

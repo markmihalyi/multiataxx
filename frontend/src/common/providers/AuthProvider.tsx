@@ -4,15 +4,12 @@ import { createContext, useEffect, useState } from "react";
 export interface IAuthContext {
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-	permanentUsername: string;
-	setPermanentUsername: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
 const AuthContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [permanentUsername, setPermanentUsername] = useState("");
 
 	useEffect(() => {
 		async function fetchData() {
@@ -34,8 +31,6 @@ const AuthContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 			value={{
 				isLoggedIn,
 				setIsLoggedIn,
-				permanentUsername,
-				setPermanentUsername,
 			}}
 		>
 			{props.children}
