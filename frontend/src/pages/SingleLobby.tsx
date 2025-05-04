@@ -12,6 +12,7 @@ function SingleLobby() {
 					navLink="/game"
 					buttonText="▶ Play"
 					dropdown={true}
+					canDisable={false}
 					options1={["Easy", "Medium", "Hard"]}
 					options2={["Small (5x5)", "Medium (7x7)", "Large (9x9)"]}
 				/>

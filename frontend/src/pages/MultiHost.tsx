@@ -12,6 +12,7 @@ function MultiHost() {
 					navLink="/game"
 					buttonText="Create Game"
 					dropdown={true}
+					canDisable={true}
 					options1={[
 						"00:30",
 						"1:00",
