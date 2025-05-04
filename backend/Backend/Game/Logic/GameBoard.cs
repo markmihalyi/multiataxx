@@ -40,16 +40,16 @@ namespace Backend.GameLogic.Logic
 
         public void PerformMove(Point start, Point destination, MoveType moveType, CellState ownCellState)
         {
-            // Ugrás esetén a kiinduló mező legyen szabad
+            // When jumping, the initial cell should be free
             if (moveType == MoveType.JUMP)
             {
                 Cells[start.X, start.Y] = CellState.Empty;
             }
 
-            // Cél mező elfoglalása
+            // Capture target cell
             Cells[destination.X, destination.Y] = ownCellState;
 
-            // Cél mezővel szomszédos ellenséges területek elfoglalása (ha van)
+            // Capture enemy cells next to the target cell (if any)
             CellState enemyCellState = ownCellState == CellState.Player1 ? CellState.Player2 : CellState.Player1;
 
             int firstCheckedRow = destination.X - 1;
@@ -73,7 +73,7 @@ namespace Backend.GameLogic.Logic
 
         public (bool, GameResult?) CheckIfGameIsOver()
         {
-            // Ellenőrzi, hogy tudnak-e lépni még a játékosok
+            // Checking whether players can still move
             bool playerOneCanMove = false;
             bool playerTwoCanMove = false;
 
@@ -92,7 +92,7 @@ namespace Backend.GameLogic.Logic
                         playerTwoCanMove = playerTwoCanMove || CanMove(i, j);
                     }
 
-                    // Ha mindkét játékos tud lépni, akkor nincs értelme további ellenőrzésnek
+                    // If both players can make a move, there is no need for further checks
                     if (playerOneCanMove && playerTwoCanMove)
                     {
                         return (false, null);
@@ -100,7 +100,7 @@ namespace Backend.GameLogic.Logic
                 }
             }
 
-            // Ha az egyik játékos nem tud már lépni, akkor az üres cellák a másik játékosé lesznek
+            // If one player can no longer move, the empty cells will belong to the other player
             if (playerOneCanMove && !playerTwoCanMove)
             {
                 FillEmptyCells(CellState.Player1);
@@ -110,7 +110,7 @@ namespace Backend.GameLogic.Logic
                 FillEmptyCells(CellState.Player2);
             }
 
-            // Megszámolja a játékosok elfoglalt mezőinek számát
+            // Counts the number of cells captured by players
             int playerOneCellCount = 0;
             int playerTwoCellCount = 0;
 
@@ -131,7 +131,7 @@ namespace Backend.GameLogic.Logic
                 }
             }
 
-            // Játék végeredményének megállapítása az elfoglalt mezők száma alapján
+            // Calculate game result based on the number of cells captured
             if (playerOneCellCount > playerTwoCellCount)
             {
                 return (true, GameResult.Player1Won);

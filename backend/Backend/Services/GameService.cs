@@ -92,37 +92,11 @@ namespace Backend.Services
             {
                 if (!Games.TryGetValue(gameCode, out var game) || game.PlayerCount != 2)
                 {
-                    Console.WriteLine("Game not found or player count is not 2.");
                     return;
                 }
 
                 using var scope = _scopeFactory.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-                // DEBUG
-                //Console.WriteLine("game.Board.Steps");
-                //for (int index = 0; index < game.Board.Steps.Count; index++)
-                //{
-                //    Console.WriteLine($"Matrix {index + 1}:");
-
-                //    var board = game.Board.Steps[index];
-                //    int rows = board.GetLength(0);
-                //    int cols = board.GetLength(1);
-
-                //    for (int i = 0; i < rows; i++)
-                //    {
-                //        List<string> rowValues = new List<string>();
-                //        for (int j = 0; j < cols; j++)
-                //        {
-                //            // Enum -> int konverzió
-                //            rowValues.Add(((int)board[i, j]).ToString());
-                //        }
-                //        Console.WriteLine(string.Join(" ", rowValues));
-                //    }
-
-                //    Console.WriteLine(); // Üres sor két mátrix között
-                //}
-                // DEBUG
 
                 var matchData = new Match()
                 {
