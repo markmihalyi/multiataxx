@@ -18,7 +18,8 @@ namespace Backend.Hubs
 
             string playerName = Context.User?.Identity?.Name ?? "Player";
             var player = new Player(userId, Context.ConnectionId, playerName);
-            if (!_gameService.TryJoinRoom(gameCode, player))
+            var joinSuccessful = await _gameService.TryJoinRoom(gameCode, player);
+            if (!joinSuccessful)
             {
                 await Clients.Caller.SendAsync("JoinFailed");
                 return;
@@ -27,7 +28,6 @@ namespace Backend.Hubs
 
             var gameData = _gameService.GetInitialGameData(gameCode, userId);
             await Clients.Caller.SendAsync("JoinSuccessful", gameData);
-            await Clients.OthersInGroup(gameCode).SendAsync("PlayerJoined", playerName);
         }
 
         public async Task PlayerIsReady()

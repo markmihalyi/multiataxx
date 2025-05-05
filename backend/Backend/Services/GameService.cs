@@ -116,9 +116,9 @@ namespace Backend.Services
             return new InitialGameData(ownPlayerId, otherPlayerName, game.State, game.Board.Cells, [(int)game.Player1TimeRemaining.TotalSeconds, (int)game.Player2TimeRemaining.TotalSeconds]);
         }
 
-        public bool TryJoinRoom(string gameCode, Player player)
+        public async Task<bool> TryJoinRoom(string gameCode, Player player)
         {
-            return Games.TryGetValue(gameCode, out var game) && game.TryJoin(player);
+            return Games.TryGetValue(gameCode, out var game) && await game.TryJoin(player);
         }
 
         public async Task NotifyGroupAsync(string gameCode, string eventName, object data)

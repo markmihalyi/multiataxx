@@ -23,7 +23,7 @@ namespace Backend.GameBase.Logic
 
         public Player? Winner { get; private set; } = null;
 
-        public bool TryJoin(Player player)
+        public async Task<bool> TryJoin(Player player)
         {
             if (Players.Any(p => p?.UserId == player.UserId))
             {
@@ -33,6 +33,7 @@ namespace Backend.GameBase.Logic
             if (PlayerCount < 2)
             {
                 Players[PlayerCount] = player;
+                await _gameService.NotifyGroupAsync(GameCode, "PlayerJoined", player.Name);
                 return true;
             }
 
