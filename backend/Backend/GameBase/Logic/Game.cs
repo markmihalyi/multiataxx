@@ -19,8 +19,7 @@ namespace Backend.GameBase.Logic
 
         public DateTime MatchStartTimeUtc { get; set; }
         public DateTime MatchEndTimeUtc { get; set; }
-        private DateTime TurnStartTimeUtc { get; set; }
-        private Timer? _timeoutTimer { get; set; }
+        private Timer? TimeoutTimer { get; set; }
 
         public Player? Winner { get; private set; } = null;
 
@@ -61,8 +60,7 @@ namespace Backend.GameBase.Logic
             if (PlayerCount == 2 && otherPlayerIsReady)
             {
                 MatchStartTimeUtc = DateTime.UtcNow;
-                TurnStartTimeUtc = DateTime.UtcNow;
-                _timeoutTimer = new Timer(CheckTimeout, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+                TimeoutTimer = new Timer(CheckTimeout, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
                 var firstPlayerIndex = FirstReadyPlayerId == Players[0]?.UserId ? 0 : 1;
                 await HandlePlayerTurnChange(firstPlayerIndex == 0 ? GameState.Player1Turn : GameState.Player2Turn);
             }
@@ -100,18 +98,7 @@ namespace Backend.GameBase.Logic
 
         private async Task HandlePlayerTurnChange(GameState state)
         {
-            TimeSpan elapsedTime = DateTime.UtcNow - TurnStartTimeUtc;
-            if (State == GameState.Player1Turn)
-            {
-                Player1TimeRemaining -= elapsedTime;
-            }
-            else if (State == GameState.Player2Turn)
-            {
-                Player2TimeRemaining -= elapsedTime;
-            }
-
             State = state;
-            TurnStartTimeUtc = DateTime.UtcNow;
 
             await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new GameData(State, Board.Cells, [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds]));
 
@@ -133,7 +120,7 @@ namespace Backend.GameBase.Logic
                 {
                     Player1TimeRemaining = TimeSpan.Zero;
                     _ = HandleGameOver(GameResult.Player2Won);
-                    _timeoutTimer?.Dispose();
+                    TimeoutTimer?.Dispose();
                 }
             }
             else if (State == GameState.Player2Turn)
@@ -143,7 +130,7 @@ namespace Backend.GameBase.Logic
                 {
                     Player2TimeRemaining = TimeSpan.Zero;
                     _ = HandleGameOver(GameResult.Player1Won);
-                    _timeoutTimer?.Dispose();
+                    TimeoutTimer?.Dispose();
                 }
             }
 
@@ -173,6 +160,6 @@ namespace Backend.GameBase.Logic
             Console.WriteLine();
         }
 
-        public void Dispose() => _timeoutTimer?.Dispose();
+        public void Dispose() => TimeoutTimer?.Dispose();
     }
 }
