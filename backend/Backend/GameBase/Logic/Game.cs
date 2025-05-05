@@ -118,22 +118,36 @@ namespace Backend.GameBase.Logic
             Debug();
         }
 
+        private DateTime? LastTimeoutCheckedTime;
+
         private void CheckTimeout(object? state)
         {
-            TimeSpan elapsedTime = DateTime.UtcNow - TurnStartTimeUtc;
+            if (State != GameState.Player1Turn && State != GameState.Player2Turn) return;
 
-            if (State == GameState.Player1Turn && elapsedTime >= Player1TimeRemaining)
+            TimeSpan checkTimeDifference = (TimeSpan)(LastTimeoutCheckedTime != null ? DateTime.UtcNow - LastTimeoutCheckedTime : TimeSpan.Zero);
+
+            if (State == GameState.Player1Turn)
             {
-                Player1TimeRemaining = TimeSpan.Zero;
-                _ = HandleGameOver(GameResult.Player2Won);
-                _timeoutTimer?.Dispose();
+                Player1TimeRemaining -= checkTimeDifference;
+                if (Player1TimeRemaining <= TimeSpan.Zero)
+                {
+                    Player1TimeRemaining = TimeSpan.Zero;
+                    _ = HandleGameOver(GameResult.Player2Won);
+                    _timeoutTimer?.Dispose();
+                }
             }
-            else if (State == GameState.Player2Turn && elapsedTime >= Player2TimeRemaining)
+            else if (State == GameState.Player2Turn)
             {
-                Player2TimeRemaining = TimeSpan.Zero;
-                _ = HandleGameOver(GameResult.Player1Won);
-                _timeoutTimer?.Dispose();
+                Player2TimeRemaining -= checkTimeDifference;
+                if (Player2TimeRemaining <= TimeSpan.Zero)
+                {
+                    Player2TimeRemaining = TimeSpan.Zero;
+                    _ = HandleGameOver(GameResult.Player1Won);
+                    _timeoutTimer?.Dispose();
+                }
             }
+
+            LastTimeoutCheckedTime = DateTime.UtcNow;
         }
 
         private async Task HandleGameOver(GameResult result)
