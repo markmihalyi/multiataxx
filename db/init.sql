@@ -14,7 +14,7 @@ GO
 
 USE [MultiAtaxx]
 GO
-/****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 05. 05. 2:43:23 ******/
+/****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 05. 05. 22:08:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -29,7 +29,7 @@ CREATE TABLE [dbo].[Boosters](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Matches]    Script Date: 2025. 05. 05. 2:43:23 ******/
+/****** Object:  Table [dbo].[Matches]    Script Date: 2025. 05. 05. 22:08:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[Matches](
 	[PlayerTwoUserId] [int] NOT NULL,
 	[WinnerUserId] [int] NULL,
 	[Steps] [nvarchar](max) NOT NULL,
-	[Date] [date] NOT NULL,
+	[Date] [datetime] NOT NULL,
 	[Duration] [int] NOT NULL,
  CONSTRAINT [PK_Matches] PRIMARY KEY CLUSTERED 
 (
@@ -48,7 +48,7 @@ CREATE TABLE [dbo].[Matches](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[OwnedBoosters]    Script Date: 2025. 05. 05. 2:43:23 ******/
+/****** Object:  Table [dbo].[OwnedBoosters]    Script Date: 2025. 05. 05. 22:08:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -64,7 +64,7 @@ CREATE TABLE [dbo].[OwnedBoosters](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Users]    Script Date: 2025. 05. 05. 2:43:23 ******/
+/****** Object:  Table [dbo].[Users]    Script Date: 2025. 05. 05. 22:08:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -82,7 +82,7 @@ CREATE TABLE [dbo].[Users](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[UserStatistics]    Script Date: 2025. 05. 05. 2:43:23 ******/
+/****** Object:  Table [dbo].[UserStatistics]    Script Date: 2025. 05. 05. 22:08:40 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
