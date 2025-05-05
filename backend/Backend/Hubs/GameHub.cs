@@ -1,5 +1,5 @@
-﻿using Backend.GameLogic.Entities;
-using Backend.GameLogic.Logic;
+﻿using Backend.GameBase.Entities;
+using Backend.GameBase.Logic;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;

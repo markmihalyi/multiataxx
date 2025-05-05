@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Backend.GameLogic.Entities
+namespace Backend.GameBase.Entities
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum BoardSize

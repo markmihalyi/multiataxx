@@ -1,6 +1,6 @@
-﻿using Backend.GameLogic.Entities;
+﻿using Backend.GameBase.Entities;
 
-namespace Backend.GameLogic.MapTemplates
+namespace Backend.GameBase.MapTemplates
 {
     public static class PredefinedMaps
     {

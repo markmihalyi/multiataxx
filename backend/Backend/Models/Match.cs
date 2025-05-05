@@ -1,4 +1,4 @@
-﻿using Backend.GameLogic.Entities;
+﻿using Backend.GameBase.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models
@@ -19,5 +19,11 @@ namespace Backend.Models
 
         [Required]
         public required List<CellState[,]> Steps { get; set; }
+
+        [Required]
+        public required DateTime Date { get; set; }
+
+        [Required]
+        public required int Duration { get; set; }
     }
 }

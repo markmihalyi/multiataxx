@@ -1,6 +1,6 @@
 ﻿using Backend;
 using Backend.Data;
-using Backend.GameLogic.Serialization;
+using Backend.GameBase.Serialization;
 using Backend.Hubs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,10 +76,16 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Services
     builder.Services.AddScoped<AuthService>();
+    builder.Services.AddSingleton<ScopedExecutor>();
     builder.Services.AddSingleton<GameService>();
 
     // Controllers
     builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new CellStateArrayConverter());
+            options.JsonSerializerOptions.Converters.Add(new CellStateArrayListConverter());
+        })
         .ConfigureApiBehaviorOptions(options =>
         {
             options.SuppressMapClientErrors = true;

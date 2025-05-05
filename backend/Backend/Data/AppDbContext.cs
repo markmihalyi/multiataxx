@@ -1,5 +1,5 @@
-﻿using Backend.GameLogic.Entities;
-using Backend.GameLogic.Serialization;
+﻿using Backend.GameBase.Entities;
+using Backend.GameBase.Serialization;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -17,6 +17,7 @@ namespace Backend.Data
         {
             var jsonOptions = new JsonSerializerOptions();
             jsonOptions.Converters.Add(new CellStateArrayConverter());
+            jsonOptions.Converters.Add(new CellStateArrayListConverter());
 
             var converter = new ValueConverter<List<CellState[,]>, string>(
                 v => JsonSerializer.Serialize(v, jsonOptions),

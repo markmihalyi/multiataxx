@@ -1,17 +1,18 @@
-﻿using Backend.Data;
-using Backend.GameLogic.Entities;
-using Backend.GameLogic.Logic;
+﻿using Backend.DTOs;
+using Backend.GameBase.Entities;
+using Backend.GameBase.Logic;
 using Backend.Hubs;
 using Backend.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 
 namespace Backend.Services
 {
-    public class GameService(IHubContext<GameHub> hubContext, IServiceScopeFactory scopeFactory)
+    public class GameService(IHubContext<GameHub> hubContext, ScopedExecutor scopedExecutor)
     {
         private readonly IHubContext<GameHub> _hubContext = hubContext;
-        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+        private readonly ScopedExecutor _scopedExecutor = scopedExecutor;
 
         private readonly ConcurrentDictionary<string, Game> Games = [];
 
@@ -33,6 +34,45 @@ namespace Backend.Services
             Games.TryAdd(gameCode, newGame);
 
             return gameCode;
+        }
+
+        public async Task<List<MatchHistoryData>> GetMatchHistory(int userId)
+        {
+            var user = await _scopedExecutor.RunInScope(async dbContext => await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId));
+            if (user == null)
+            {
+                return [];
+            }
+
+            var matches = await _scopedExecutor.RunInScope(async dbContext =>
+                await dbContext.Matches
+                .Where(m => m.PlayerOneUserId == userId || m.PlayerTwoUserId == userId)
+                .Select(m => new MatchHistoryData(m.Id, m.WinnerUserId == userId ? MatchResult.Won : m.WinnerUserId == null ? MatchResult.Draw : MatchResult.Lost, m.Duration, m.Date))
+                .ToListAsync()
+            );
+            return matches;
+        }
+
+        public async Task<MatchDetails?> GetMatchDetails(int userId, Guid matchGuid)
+        {
+            var matchData = await _scopedExecutor.RunInScope(async dbContext =>
+                await dbContext.Matches
+                .FirstOrDefaultAsync(m => m.Id == matchGuid && (m.PlayerOneUserId == userId || m.PlayerTwoUserId == userId))
+            );
+            if (matchData == null)
+            {
+                return null;
+            }
+
+            var playerOne = await _scopedExecutor.RunInScope(async dbContext => await dbContext.Users.FirstOrDefaultAsync(u => u.Id == matchData.PlayerOneUserId));
+            var playerTwo = await _scopedExecutor.RunInScope(async dbContext => await dbContext.Users.FirstOrDefaultAsync(u => u.Id == matchData.PlayerTwoUserId));
+            if (playerOne == null || playerTwo == null)
+            {
+                return null;
+            }
+
+            var matchResult = matchData.WinnerUserId == userId ? MatchResult.Won : matchData.WinnerUserId == null ? MatchResult.Draw : MatchResult.Lost;
+            return new MatchDetails(matchData.Id, matchResult, [playerOne.Username, playerTwo.Username], matchData.Steps);
         }
 
         public async Task<bool> RemoveGame(string gameCode)
@@ -95,29 +135,31 @@ namespace Backend.Services
                     return;
                 }
 
-                using var scope = _scopeFactory.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
                 var matchData = new Match()
                 {
                     Id = Guid.NewGuid(),
                     PlayerOneUserId = game.Players[0]?.UserId ?? -1,
                     PlayerTwoUserId = game.Players[1]?.UserId ?? -1,
                     WinnerUserId = game.Winner?.UserId,
-                    Steps = game.Board.Steps
+                    Steps = game.Board.Steps,
+                    Date = game.MatchEndTimeUtc,
+                    Duration = (int)(game.MatchEndTimeUtc - game.MatchStartTimeUtc).TotalSeconds
                 };
 
-                dbContext.Matches.Add(matchData);
                 Console.WriteLine("Saving match data to the database...");
-                await dbContext.SaveChangesAsync();
+                await _scopedExecutor.RunInScope(async dbContext =>
+                {
+                    dbContext.Matches.Add(matchData);
+                    await dbContext.SaveChangesAsync();
+                });
                 Console.WriteLine("Match data saved successfully.");
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred while saving match data: {ex.Message}");
             }
         }
-
 
         private async Task RemoveAllConnectionsFromGroup(string gameCode)
         {

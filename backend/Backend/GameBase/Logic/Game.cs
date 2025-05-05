@@ -1,7 +1,7 @@
-﻿using Backend.GameLogic.Entities;
+﻿using Backend.GameBase.Entities;
 using Backend.Services;
 
-namespace Backend.GameLogic.Logic
+namespace Backend.GameBase.Logic
 {
     public class Game(GameService gameService, string GameCode, BoardSize boardSize, double turnMinutes) : IDisposable
     {
@@ -17,6 +17,8 @@ namespace Backend.GameLogic.Logic
         public TimeSpan Player1TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
         public TimeSpan Player2TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
 
+        public DateTime MatchStartTimeUtc { get; set; }
+        public DateTime MatchEndTimeUtc { get; set; }
         private DateTime TurnStartTimeUtc { get; set; }
         private Timer? _timeoutTimer { get; set; }
 
@@ -58,6 +60,7 @@ namespace Backend.GameLogic.Logic
 
             if (PlayerCount == 2 && otherPlayerIsReady)
             {
+                MatchStartTimeUtc = DateTime.UtcNow;
                 TurnStartTimeUtc = DateTime.UtcNow;
                 _timeoutTimer = new Timer(CheckTimeout, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
                 var firstPlayerIndex = FirstReadyPlayerId == Players[0]?.UserId ? 0 : 1;
@@ -68,7 +71,7 @@ namespace Backend.GameLogic.Logic
         public async Task<string> AttemptMove(int userId, Point start, Point destination)
         {
             int playerIndex = Array.FindIndex(Players, p => p?.UserId == userId);
-            if (playerIndex == -1 || (playerIndex == 0 && State != GameState.Player1Turn) || (playerIndex == 1 && State != GameState.Player2Turn))
+            if (playerIndex == -1 || playerIndex == 0 && State != GameState.Player1Turn || playerIndex == 1 && State != GameState.Player2Turn)
             {
                 return "NotYourTurn";
             }
@@ -135,6 +138,7 @@ namespace Backend.GameLogic.Logic
 
         private async Task HandleGameOver(GameResult result)
         {
+            MatchEndTimeUtc = DateTime.UtcNow;
             State = GameState.Ended;
             Winner = result == GameResult.Player1Won ? Players[0] : result == GameResult.Player2Won ? Players[1] : null;
             await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells, [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds]));

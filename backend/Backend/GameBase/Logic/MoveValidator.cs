@@ -1,6 +1,6 @@
-﻿using Backend.GameLogic.Entities;
+﻿using Backend.GameBase.Entities;
 
-namespace Backend.GameLogic.Logic
+namespace Backend.GameBase.Logic
 {
     public record Point(int X, int Y)
     {

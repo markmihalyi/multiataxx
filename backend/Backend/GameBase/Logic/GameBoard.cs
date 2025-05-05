@@ -1,9 +1,9 @@
-﻿using Backend.GameLogic.Entities;
-using Backend.GameLogic.MapTemplates;
-using Backend.GameLogic.Serialization;
+﻿using Backend.GameBase.Entities;
+using Backend.GameBase.MapTemplates;
+using Backend.GameBase.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Backend.GameLogic.Logic
+namespace Backend.GameBase.Logic
 {
     public class GameBoard
     {

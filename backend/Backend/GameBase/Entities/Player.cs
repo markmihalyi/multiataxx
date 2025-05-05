@@ -1,4 +1,4 @@
-﻿namespace Backend.GameLogic.Entities
+﻿namespace Backend.GameBase.Entities
 {
     public class Player(int userId, string connectionId, string name)
     {

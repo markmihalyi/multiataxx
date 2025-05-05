@@ -138,6 +138,7 @@ public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authS
     /// </summary>
     /// <response code="200">If the logout was successful</response>
     [HttpPost("logout")]
+    [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Logout()
     {
         var refreshToken = Request.Cookies["refresh_token"];

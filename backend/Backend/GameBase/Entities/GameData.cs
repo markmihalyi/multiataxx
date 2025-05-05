@@ -1,4 +1,4 @@
-﻿namespace Backend.GameLogic.Entities
+﻿namespace Backend.GameBase.Entities
 {
     public record InitialGameData(int OwnPlayerId, string? OtherPlayerName, GameState State, CellState[,] Cells, int[] TimeRemaining);
 
