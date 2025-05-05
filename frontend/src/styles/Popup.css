@@ -158,6 +158,12 @@
 	font-size: 0.9rem;
 }
 
+.login-form > input.inputError {
+	color: red;
+	border: 1px solid red;
+	animation: shake 0.3s;
+}
+
 .login-form > p {
 	color: gray;
 	font-size: 0.8rem;
@@ -166,10 +172,8 @@
 
 #errorMessage {
 	color: red;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 	font-weight: bold;
-	opacity: 1;
-	transition: opacity 0.5s ease-in-out;
 }
 
 .login-form > p > a {

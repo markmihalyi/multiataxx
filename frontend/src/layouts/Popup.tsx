@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { FaUnlockAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import api from "../api";
 import { handleAxiosError } from "../api";
 import useAuth from "../common/hooks/useAuth";
@@ -15,17 +15,15 @@ interface PopupProps {
 }
 
 const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
+	const navigate = useNavigate();
+
 	const [isVisible, setIsVisible] = useState(false);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [inputError, setInputError] = useState<boolean>(false);
 
-	const {
-		isLoggedIn,
-		setIsLoggedIn,
-		permanentUsername,
-		setPermanentUsername,
-	} = useAuth();
+	const { isLoggedIn, setIsLoggedIn } = useAuth();
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault(); //prevent reloading
@@ -35,7 +33,6 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 				username,
 				password,
 			});
-			setPermanentUsername(username);
 			setUsername("");
 			setPassword("");
 			setErrorMessage(null);
@@ -43,14 +40,17 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 
 			setTimeout(() => {
 				setIsLoggedIn(true);
+				navigate("/");
 			}, 320);
 		} catch (error) {
 			const errorData: ApiResponse = handleAxiosError(error);
 			setErrorMessage(errorData.message);
+			setInputError(true);
 
 			setTimeout(() => {
 				setErrorMessage(null);
-			}, 3000);
+				setInputError(false);
+			}, 1500);
 		}
 	};
 
@@ -60,8 +60,8 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 			setIsOpen(false);
 
 			setTimeout(() => {
-				setPermanentUsername("");
 				setIsLoggedIn(false);
+				navigate("/");
 			}, 320);
 		} catch (error) {
 			const errorData: ApiResponse = handleAxiosError(error);
@@ -128,6 +128,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					<h2>Hi there!</h2>
 					<form onSubmit={handleLogin} className="login-form">
 						<input
+							className={`${inputError ? "inputError" : ""}`}
 							type="text"
 							value={username}
 							onInput={(e) => setUsername(e.currentTarget.value)}
@@ -136,6 +137,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 							required
 						/>
 						<input
+							className={`${inputError ? "inputError" : ""}`}
 							type="password"
 							value={password}
 							onInput={(e) => setPassword(e.currentTarget.value)}
@@ -143,18 +145,19 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 							autoComplete="current-password"
 							required
 						/>
-						{errorMessage && (
-							<p id="errorMessage">{errorMessage}</p>
-						)}
 						<button type="submit" className="loginButton w80">
 							Login
 						</button>
-						<p>
-							No account yet?{" "}
-							<NavLink to="/register" id="register-link" end>
-								Register here!
-							</NavLink>
-						</p>
+						{errorMessage ? (
+							<p id="errorMessage">{errorMessage}</p>
+						) : (
+							<p>
+								No account yet?{" "}
+								<NavLink to="/register" id="register-link" end>
+									Register here!
+								</NavLink>
+							</p>
+						)}
 					</form>
 				</div>
 			</div>
@@ -181,13 +184,11 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					</div>
 					<p>User logged in:</p>
 					<p id="p-bottom">
-						<b>{permanentUsername}</b>
+						<b>bob</b>
 					</p>
-					<NavLink to="/" end>
-						<button className="loginButton" onClick={handleLogOut}>
-							Log out
-						</button>
-					</NavLink>
+					<button className="loginButton" onClick={handleLogOut}>
+						Log out
+					</button>
 				</div>
 			</div>
 		);
