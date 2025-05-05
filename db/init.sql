@@ -4,7 +4,7 @@ BEGIN
 END
 GO
 
--- Ellenőrizzük, hogy az adatbázis biztosan elérhető-e
+-- Make sure the database is available
 WHILE NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'MultiAtaxx')
 BEGIN
     WAITFOR DELAY '00:00:01'
@@ -14,7 +14,7 @@ GO
 
 USE [MultiAtaxx]
 GO
-/****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 03. 04. 22:00:29 ******/
+/****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 05. 05. 2:43:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -29,24 +29,26 @@ CREATE TABLE [dbo].[Boosters](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Matches]    Script Date: 2025. 03. 04. 22:00:29 ******/
+/****** Object:  Table [dbo].[Matches]    Script Date: 2025. 05. 05. 2:43:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Matches](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[PlayerOneId] [int] NOT NULL,
-	[PlayerTwoId] [int] NOT NULL,
-	[WinnerId] [int] NULL,
+	[Id] [uniqueidentifier] NOT NULL,
+	[PlayerOneUserId] [int] NOT NULL,
+	[PlayerTwoUserId] [int] NOT NULL,
+	[WinnerUserId] [int] NULL,
 	[Steps] [nvarchar](max) NOT NULL,
+	[Date] [date] NOT NULL,
+	[Duration] [int] NOT NULL,
  CONSTRAINT [PK_Matches] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[OwnedBoosters]    Script Date: 2025. 03. 04. 22:00:29 ******/
+/****** Object:  Table [dbo].[OwnedBoosters]    Script Date: 2025. 05. 05. 2:43:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -62,7 +64,7 @@ CREATE TABLE [dbo].[OwnedBoosters](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Users]    Script Date: 2025. 03. 04. 22:00:29 ******/
+/****** Object:  Table [dbo].[Users]    Script Date: 2025. 05. 05. 2:43:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -80,7 +82,7 @@ CREATE TABLE [dbo].[Users](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[UserStatistics]    Script Date: 2025. 03. 04. 22:00:29 ******/
+/****** Object:  Table [dbo].[UserStatistics]    Script Date: 2025. 05. 05. 2:43:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -98,21 +100,6 @@ CREATE TABLE [dbo].[UserStatistics](
 	[UserId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Matches]  WITH CHECK ADD  CONSTRAINT [FK_Matches_Users_1] FOREIGN KEY([PlayerOneId])
-REFERENCES [dbo].[Users] ([Id])
-GO
-ALTER TABLE [dbo].[Matches] CHECK CONSTRAINT [FK_Matches_Users_1]
-GO
-ALTER TABLE [dbo].[Matches]  WITH CHECK ADD  CONSTRAINT [FK_Matches_Users_2] FOREIGN KEY([PlayerTwoId])
-REFERENCES [dbo].[Users] ([Id])
-GO
-ALTER TABLE [dbo].[Matches] CHECK CONSTRAINT [FK_Matches_Users_2]
-GO
-ALTER TABLE [dbo].[Matches]  WITH CHECK ADD  CONSTRAINT [FK_Matches_Users_Winner] FOREIGN KEY([WinnerId])
-REFERENCES [dbo].[Users] ([Id])
-GO
-ALTER TABLE [dbo].[Matches] CHECK CONSTRAINT [FK_Matches_Users_Winner]
 GO
 ALTER TABLE [dbo].[OwnedBoosters]  WITH CHECK ADD  CONSTRAINT [FK_OwnedBoosters_Boosters] FOREIGN KEY([BoosterId])
 REFERENCES [dbo].[Boosters] ([Id])
