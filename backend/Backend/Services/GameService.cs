@@ -206,7 +206,7 @@ namespace Backend.Services
 
             foreach (var player in game.Players)
             {
-                if (player == null || player.UserId == null) continue;
+                if (player == null || player.ConnectionId == null) continue;
                 await _hubContext.Groups.RemoveFromGroupAsync(player.ConnectionId, gameCode);
             }
         }

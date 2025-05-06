@@ -134,6 +134,32 @@ public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authS
     }
 
     /// <summary>
+    /// Get user details
+    /// </summary>
+    /// <response code="200">If the request was successful</response>
+    /// <response code="401">If the user is not logged in</response>
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetUserDetails()
+    {
+        var userIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdentifier == null)
+        {
+            return Unauthorized(new ErrorResponse("You are not logged in."));
+        }
+
+        int userId = Convert.ToInt32(userIdentifier.Value);
+        var user = await _authService.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return Unauthorized(new ErrorResponse("You are not logged in."));
+        }
+
+        return Ok(new UserDetailsResponse(user.Id, user.Username));
+    }
+
+    /// <summary>
     /// Logout from an account
     /// </summary>
     /// <response code="200">If the logout was successful</response>
