@@ -3,7 +3,7 @@
 Docker környezet elkészítéséhez futtasd az alábbi parancsot a gyökérkönyvtárban:
 
 ```bash
-docker compose up -d
+docker compose up --build -d
 ```
 
 A backend alapértelmezetten itt érhető el: `http://localhost:5000`
