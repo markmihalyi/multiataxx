@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 public class GameState
 {
     public int[,] Board { get; private set; }
-    public static int N = 7; // Tábla mérete
+    public static int N; // Tábla mérete
     public int CurrentPlayer { get; private set; }
     private static int[] dx = { -1, 1, 0, 0, -1, 1, -1, 1, -2, 2, 0, 0, 2, -2, -2, 2 };
     private static int[] dy = { 0, 0, -1, 1, -1, 1, 1, -1, 0, 0, -2, 2, 2, -2, 2, -2 };
@@ -13,10 +13,18 @@ public class GameState
     private Stack<(int fromx, int fromy, int tox, int toy)> moveHistory
     = new Stack<(int, int, int, int)>();
 
-    public GameState()
+    public GameState(int boardSize)
     {
-        InitializeBoard();
+        N = boardSize;
         CurrentPlayer = 1; // Kezdetben Player 1 lép (azaz az ember)
+        InitializeBoard();
+    }
+    public GameState(int[,] board, int currentPlayer, int boardSize)
+    {
+        Board = board;
+        CurrentPlayer = currentPlayer;
+        N = boardSize;
+        InitializeBoard();
     }
 
     // Kezdő pozíciók beállítása
@@ -57,35 +65,40 @@ public class GameState
     // Érvényes lépés ellenőrzése
     public bool IsValidMove(int x, int y, int fromx, int fromy)
     {
-        if (!IsValidCoordinate(x, y) || !IsValidCoordinate(fromx, fromy) ||
-            Board[x, y] != 0 || Board[fromx, fromy] != CurrentPlayer)
+        if (!IsValidCoordinate(x, y))
+        {
+            return false;
+        }
+        if (!IsValidCoordinate(fromx, fromy))
+        {
+            return false;
+        }
+        if (Board[x, y] != 0 )
         {
             return false;
         }
 
-
-        for (int i = 0; i < dx.Length; i++)
+        if (Board[fromx, fromy] != CurrentPlayer)
         {
-            int nx = x + dx[i];
-            int ny = y + dy[i];
-            if (IsValidCoordinate(nx, ny) && Board[nx, ny] == CurrentPlayer &&
-                nx == fromx && ny == fromy)
-            {
+            return false;
+        }
+
+        if (Math.Abs(x - fromx) <= 2 && Math.Abs(y - fromy) <= 2)
+        {
                 return true;
-            }
         }
 
         // Ha nem találtunk a közelben saját bábút, akkor érvénytelen lépés
         return false;
 
     }
-    private bool IsValidCoordinate(int x, int y)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsValidCoordinate(int x, int y)
     {
-        return x >= 0 && y >= 0 && x < N && y < N;
+        return (uint)x < N && (uint)y < N;
     }
 
     // Lépés végrehajtása és a környező mezők frissítése
-    //Nem kezeli, hogy ha ugrik valaki törölje az előző mezőt. Mert nem tudja melyikről lépnek.
     public void MakeMove(int x, int y, int fromx, int fromy)
     {
         if (IsValidMove(x, y, fromx, fromy))
@@ -104,17 +117,14 @@ public class GameState
     private void JumpUpdateCells(int x, int y, int fromx, int fromy)
     {
         // Ha ugrunk akkor az előző mezőt töröljük
-        int[] dx = { -2, 2, 0, 0, 2, -2, -2, 2 };
-        int[] dy = { 0, 0, -2, 2, 2, -2, 2, -2 };
-
-        for (int b = 0; b < dx.Length; b++)
+        if (Math.Abs(x - fromx) == 2 && Math.Abs(y - fromy) == 2
+            ||
+            Math.Abs(x - fromx) == 0 && Math.Abs(y - fromy) == 2
+            ||
+            Math.Abs(x - fromx) == 2 && Math.Abs(y - fromy) == 0
+            )
         {
-            int nx = fromx + dx[b];
-            int ny = fromy + dy[b];
-            if (nx == x && ny == y)
-            {
-                Board[fromx, fromy] = 0;
-            }
+            Board[fromx, fromy] = 0;
         }
     }
     // Környező mezők frissítése
@@ -196,7 +206,7 @@ public class GameState
     // Játékállapot klónozása
     public GameState Clone()
     {
-        GameState newState = new GameState();
+        GameState newState = new GameState(N);
 
         // Másolat készítése a játékállapotról
         newState.Board = (int[,])this.Board.Clone();

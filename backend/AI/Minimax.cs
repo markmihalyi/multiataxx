@@ -1,26 +1,67 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Numerics;
+using System.Text;
+
 
 public class Minimax
 {
     private GameState _gameState; 
     private int _maxDepth;
 
+   
+    private Dictionary<string, int> _memoria = new Dictionary<string, int>();
     public Minimax(GameState gameState, int maxDepth)
     {
-        _gameState = gameState; 
+        _gameState = gameState;
         _maxDepth = maxDepth;
+        LoadMemoryFromFile("memory.json");
     }
+    public void SaveMemoryToFile(string filePath)
+    {
+        var json = JsonConvert.SerializeObject(_memoria, Formatting.Indented);
+        File.WriteAllText(filePath, json);
+    }
+
+    public void LoadMemoryFromFile(string filePath)
+    {
+        if (File.Exists(filePath))
+        {
+            var json = File.ReadAllText(filePath);
+            _memoria = JsonConvert.DeserializeObject<Dictionary<string, int>>(json) ?? new Dictionary<string, int>();
+        }
+        else
+        {
+            _memoria = new Dictionary<string, int>();
+        }
+    }
+    private string GetGameStateKey(GameState gameState)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        // A tábla adatait és a játékos azonosítóját egy byte tömbbe másoljuk
+        var boardBytes = new byte[gameState.Board.Length * sizeof(int) + 1];
+        Buffer.BlockCopy(gameState.Board, 0, boardBytes, 0, gameState.Board.Length * sizeof(int));
+        boardBytes[^1] = (byte)gameState.CurrentPlayer; // Játékos azonosító hozzáadása
+        // Hash kiszámítása
+        var hash = sha256.ComputeHash(boardBytes);
+        // Base64 stringként visszaadjuk a kulcsot
+        return Convert.ToBase64String(hash);
+    }
+
 
     public int MinimaxAlgorithm(GameState gameState, int depth, bool isMaxPlayer, int alpha, int beta)
     {
-        /*Program.DisplayBoard(gameState);
-        Thread.Sleep(1000);*/
+        string key = GetGameStateKey(gameState);
         if (depth <= 0 || gameState.IsGameOver())
         {
             return Evaluate(gameState);
+        }
+        // Ellenőrizzük, hogy az állapot már szerepel-e a memóban
+        if (_memoria.ContainsKey(key))
+        {
+            return _memoria[key];  // Visszaadjuk a memóban tárolt értéket
         }
 
         if (isMaxPlayer)
@@ -31,7 +72,6 @@ public class Minimax
             gameState.SwitchPlayer();
             foreach (var move in gameState.GeneratePossibleMoves(2))
             {
-                //Console.WriteLine($"BOT Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
                 GameState newState = gameState.Clone();
                 newState.MakeMove(move.x, move.y, move.fromx, move.fromy);
                 int eval = MinimaxAlgorithm(newState, depth - 1, !isMaxPlayer, alpha, beta);
@@ -44,6 +84,7 @@ public class Minimax
                 }
 
             }
+            _memoria[key] = maxEval;  // Tároljuk az értéket
             return maxEval;
         }
         else
@@ -66,6 +107,7 @@ public class Minimax
                 }
 
             }
+            _memoria[key] = minEval;  // Tároljuk az értéket
             return minEval;
         }
     }
@@ -84,11 +126,9 @@ public class Minimax
             {
                 maxEval = eval;
                 bestMove = move;
-                Console.WriteLine($"Frissített maxEval: {maxEval}, Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
-                //Thread.Sleep(1000);
             }
         }
-
+        SaveMemoryToFile("memory.json");
         return bestMove; // Ha nem talált érvényes lépést, (-1, -1, -1, -1) értéket ad vissza
 }
 

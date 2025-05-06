@@ -5,8 +5,8 @@ class Program
     static void Main(string[] args)
     {
         // inicializálás
-        GameState gameState = new GameState();
-        BotService botService = new BotService(gameState);
+        GameState gameState = new GameState(5);
+        BotService botService = new BotService(gameState, AI.DifficultyLevel.Hard);
 
         // A játék futtatása
         while (true)
@@ -40,12 +40,10 @@ class Program
                         gameState.MakeMove(x, y, fromx, fromy);
                         gameState.SwitchPlayer();
                     }
-
                 }
                 else
                 {
                     Console.WriteLine("Érvénytelen lépés. Próbáld újra.");
-                    //Thread.Sleep(1000);
                 }
             }
             else
@@ -54,9 +52,6 @@ class Program
                 botService.MakeBotMove();
                 gameState.SwitchPlayer(); 
             }
-
-            // TODO: A játék vége ellenőrzése (egy egyszerű logika a végén)
-
         }
     }
 
