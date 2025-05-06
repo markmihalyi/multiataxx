@@ -68,6 +68,7 @@ const Panel: React.FC<PanelProps> = ({
 			const { status, data } = await api.post<HostGameApiResponse>(
 				"/api/game",
 				{
+					gameType: "multiplayer",
 					boardSize,
 					turnMinutes,
 				}
@@ -147,6 +148,11 @@ const Panel: React.FC<PanelProps> = ({
 					type="text"
 					value={gameCode}
 					onChange={(e) => setGameCode(e.currentTarget.value)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
+							handleJoinGame();
+						}
+					}}
 					placeholder="xxxxxxxx"
 				></input>
 				<button

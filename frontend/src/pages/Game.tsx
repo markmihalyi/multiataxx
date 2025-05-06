@@ -1,6 +1,12 @@
+import "../styles/Error&Ready.css";
+
 import { useEffect, useState } from "react";
 
+import Error from "../components/Error";
 import Navbar from "../layouts/Navbar";
+import Ready from "../components/Ready";
+import Table from "../components/Table";
+import ThreeDotLoading from "../components/ThreeDotLoading";
 import { useSearchParams } from "react-router";
 import useSocket from "../common/hooks/useSocket";
 
@@ -90,18 +96,18 @@ function Game() {
 	return (
 		<>
 			<Navbar />
-			{!joined && !showError && <p>Loading...</p>}
-			{!joined && showError && (
-				<p>Nem sikerult csatlakozni (általános hiba)</p>
-			)}
-			{/*popup/container: vissza a főoldalra*/}
-			{gameState === "Waiting" && (
-				<button onClick={handlePlayerIsReady} disabled={playerIsReady}>
-					Ready
-				</button>
-			)}
-			{/*Ready button ha már nincs loading*/}
-			{/*Ready onclick: setplayerisready függvény*/}
+			<div className="container">
+				{!joined && !showError && <ThreeDotLoading />}
+				{!joined && showError && <Error />}
+				{gameState === "Waiting" ? (
+					<Ready
+						buttonHandle={handlePlayerIsReady}
+						isReady={playerIsReady}
+					/>
+				) : (
+					cells != null && <Table cells={cells} />
+				)}
+			</div>
 		</>
 	);
 }
