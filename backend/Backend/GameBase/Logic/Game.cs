@@ -7,6 +7,8 @@ namespace Backend.GameBase.Logic
     public class Game : IDisposable
     {
         private readonly GameService _gameService;
+        private readonly IGameAI? _gameAI;
+
         public string GameCode { get; }
         public GameDifficulty Difficulty { get; }
 
@@ -28,9 +30,9 @@ namespace Backend.GameBase.Logic
         public Player? Winner { get; private set; } = null;
         public GameType Type { get; }
 
-        public Game(GameService gameService, string gameCode, GameType gameType, BoardSize boardSize, double turnMinutes)
+        public Game(IServiceProvider provider, string gameCode, GameType gameType, BoardSize boardSize, double turnMinutes)
         {
-            _gameService = gameService;
+            _gameService = provider.GetRequiredService<GameService>();
             GameCode = gameCode;
             Type = gameType;
             Board = new(boardSize);
@@ -38,9 +40,10 @@ namespace Backend.GameBase.Logic
             Player2TimeRemaining = TimeSpan.FromMinutes((double)turnMinutes);
         }
 
-        public Game(GameService gameService, string gameCode, GameType gameType, BoardSize boardSize, GameDifficulty difficulty)
+        public Game(IServiceProvider provider, string gameCode, GameType gameType, BoardSize boardSize, GameDifficulty difficulty)
         {
-            _gameService = gameService;
+            _gameService = provider.GetRequiredService<GameService>();
+            _gameAI = provider.GetRequiredService<IGameAI>();
             GameCode = gameCode;
             Type = gameType;
             Board = new(boardSize);
@@ -144,10 +147,10 @@ namespace Backend.GameBase.Logic
         private async Task HandlePlayerTurnChange(GameState state)
         {
             State = state;
-            Debug();
 
             if (Type == GameType.MultiPlayer)
             {
+                Debug();
                 await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new MultiGameData(State, Board.Cells, RemainingTimes));
             }
             else if (Type == GameType.SinglePlayer)
@@ -156,9 +159,13 @@ namespace Backend.GameBase.Logic
 
                 if (state == GameState.Player2Turn)
                 {
-                    // TODO: Get AI move
+                    // AI move
+                    Debug();
+                    var move = (_gameAI?.CalculateBotMove(Board.Cells, CellState.Player2, (BoardSize)Board.Size, Difficulty)) ?? throw new Exception("AI not responding.");
                     await Task.Delay(1000);
-                    await AttemptMove(null, new Point(4, 4), new Point(3, 3), true);
+                    await AttemptMove(null, new Point(move.startX, move.startY), new Point(move.destX, move.destY), true);
+                    Console.WriteLine("AI move: " + move.ToString());
+                    Debug();
                 }
             }
         }
@@ -204,13 +211,13 @@ namespace Backend.GameBase.Logic
             if (Type == GameType.MultiPlayer)
             {
                 await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalMultiGameData(result, State, Board.Cells, RemainingTimes));
+                await _gameService.SaveMatchData(GameCode);
             }
             else if (Type == GameType.SinglePlayer)
             {
                 await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalSingleGameData(result, State, Board.Cells));
             }
 
-            await _gameService.SaveMatchData(GameCode);
             await _gameService.RemoveGame(GameCode);
 
             Debug();

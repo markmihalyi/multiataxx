@@ -4,3 +4,4 @@ obj/
 .vscode/
 out/
 MultiAtaxx.API.xml
+memory.json

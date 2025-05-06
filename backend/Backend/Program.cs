@@ -80,7 +80,6 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<AuthService>();
     builder.Services.AddSingleton<ScopedExecutor>();
     builder.Services.AddSingleton<GameService>();
-    //builder.Services.AddTransient<Game>();
 
     // Load AI class with loose coupling
     var aiDllPath = Path.Combine(AppContext.BaseDirectory, "AI.dll");

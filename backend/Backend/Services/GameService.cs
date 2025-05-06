@@ -10,10 +10,11 @@ using System.Collections.Concurrent;
 
 namespace Backend.Services
 {
-    public class GameService(IHubContext<GameHub> hubContext, ScopedExecutor scopedExecutor)
+    public class GameService(IHubContext<GameHub> hubContext, ScopedExecutor scopedExecutor, IServiceProvider provider)
     {
         private readonly IHubContext<GameHub> _hubContext = hubContext;
         private readonly ScopedExecutor _scopedExecutor = scopedExecutor;
+        private readonly IServiceProvider _provider = provider;
 
         private readonly ConcurrentDictionary<string, Game> Games = [];
 
@@ -31,7 +32,7 @@ namespace Backend.Services
                 gameCode = GenerateGameCode();
             }
 
-            var newGame = new Game(this, gameCode, GameType.MultiPlayer, boardSize, turnMinutes);
+            var newGame = new Game(_provider, gameCode, GameType.MultiPlayer, boardSize, turnMinutes);
             Games.TryAdd(gameCode, newGame);
 
             return gameCode;
@@ -45,7 +46,7 @@ namespace Backend.Services
                 gameCode = GenerateGameCode();
             }
 
-            var newGame = new Game(this, gameCode, GameType.SinglePlayer, boardSize, difficulty);
+            var newGame = new Game(_provider, gameCode, GameType.SinglePlayer, boardSize, difficulty);
             Games.TryAdd(gameCode, newGame);
 
             return gameCode;
@@ -205,7 +206,7 @@ namespace Backend.Services
 
             foreach (var player in game.Players)
             {
-                if (player == null) continue;
+                if (player == null || player.UserId == null) continue;
                 await _hubContext.Groups.RemoveFromGroupAsync(player.ConnectionId, gameCode);
             }
         }
