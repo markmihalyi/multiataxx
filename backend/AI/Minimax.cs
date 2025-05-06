@@ -1,27 +1,27 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Numerics;
-using System.Text;
+﻿using System.Text.Json;
 
 
 public class Minimax
 {
-    private GameState _gameState; 
+    private GameState _gameState;
     private int _maxDepth;
+    string memoryFilePath = "memory.json";
 
-   
+
     private Dictionary<string, int> _memoria = new Dictionary<string, int>();
     public Minimax(GameState gameState, int maxDepth)
     {
         _gameState = gameState;
         _maxDepth = maxDepth;
-        LoadMemoryFromFile("memory.json");
+
+        if (File.Exists(memoryFilePath))
+        {
+            LoadMemoryFromFile(memoryFilePath);
+        }
     }
     public void SaveMemoryToFile(string filePath)
     {
-        var json = JsonConvert.SerializeObject(_memoria, Formatting.Indented);
+        var json = JsonSerializer.Serialize(_memoria, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(filePath, json);
     }
 
@@ -30,13 +30,14 @@ public class Minimax
         if (File.Exists(filePath))
         {
             var json = File.ReadAllText(filePath);
-            _memoria = JsonConvert.DeserializeObject<Dictionary<string, int>>(json) ?? new Dictionary<string, int>();
+            _memoria = JsonSerializer.Deserialize<Dictionary<string, int>>(json) ?? [];
         }
         else
         {
-            _memoria = new Dictionary<string, int>();
+            _memoria = [];
         }
     }
+
     private string GetGameStateKey(GameState gameState)
     {
         using var sha256 = System.Security.Cryptography.SHA256.Create();
@@ -119,7 +120,7 @@ public class Minimax
         int beta = int.MaxValue;
         foreach (var move in gameState.GeneratePossibleMoves(2))
         {
-            GameState newState = gameState.Clone(); 
+            GameState newState = gameState.Clone();
             newState.MakeMove(move.x, move.y, move.fromx, move.fromy);
             int eval = MinimaxAlgorithm(newState, _maxDepth - 1, false, alpha, beta);
             if (eval > maxEval)
@@ -128,9 +129,9 @@ public class Minimax
                 bestMove = move;
             }
         }
-        SaveMemoryToFile("memory.json");
+        SaveMemoryToFile(memoryFilePath);
         return bestMove; // Ha nem talált érvényes lépést, (-1, -1, -1, -1) értéket ad vissza
-}
+    }
 
 
 
@@ -160,7 +161,7 @@ public class Minimax
                 playerPositionAdvantage += 3;
             }
         }
-        
+
         // Mozgási lehetőségek (mobilitás)
         int botMoves = gameState.GeneratePossibleMovesCount(2);
         int playerMoves = gameState.GeneratePossibleMovesCount(1);

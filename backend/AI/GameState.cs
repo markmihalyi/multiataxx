@@ -6,7 +6,7 @@ using AI.Abstractions;
 public class GameState
 {
     public int[,] Board { get; private set; }
-    public static int N; // Tábla mérete
+    public static int N = 5; // Tábla mérete
     public int CurrentPlayer { get; private set; }
     private static int[] dx = { -1, 1, 0, 0, -1, 1, -1, 1, -2, 2, 0, 0, 2, -2, -2, 2 };
     private static int[] dy = { 0, 0, -1, 1, -1, 1, 1, -1, 0, 0, -2, 2, 2, -2, 2, -2 };
@@ -25,7 +25,6 @@ public class GameState
         Board = board;
         CurrentPlayer = currentPlayer;
         N = boardSize;
-        InitializeBoard();
     }
 
     // Kezdő pozíciók beállítása

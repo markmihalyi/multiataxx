@@ -20,7 +20,7 @@ public class BotService : IGameAI
     public (int startX, int startY, int destX, int destY) CalculateBotMove(CellState[,] board, CellState player, BoardSize size, GameDifficulty diff)
     {
         int[,] intBoard = new int[board.GetLength(0), board.GetLength(1)];
-
+        
         for (int x = 0; x < board.GetLength(0); x++)
         {
             for (int y = 0; y < board.GetLength(1); y++)
