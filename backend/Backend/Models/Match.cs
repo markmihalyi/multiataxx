@@ -1,4 +1,4 @@
-﻿using Backend.GameBase.Entities;
+﻿using AI.Abstractions;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models

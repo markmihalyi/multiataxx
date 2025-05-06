@@ -45,15 +45,12 @@ services:
     container_name: backend
     ports:
       - "5000:8080"
-      - "5001:8081"
     volumes:
-      - ./backend:/app
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production 
+      - ./backend:/backend
     depends_on:
       database-init:
         condition: service_completed_successfully
-        
+
   frontend:
     build:
       context: ./frontend

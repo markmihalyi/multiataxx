@@ -1,4 +1,5 @@
-﻿using Backend.DTOs;
+﻿using AI.Abstractions;
+using Backend.DTOs;
 using Backend.GameBase.Entities;
 using Backend.GameBase.Logic;
 using Backend.Hubs;
@@ -16,7 +17,7 @@ namespace Backend.Services
 
         private readonly ConcurrentDictionary<string, Game> Games = [];
 
-        public string? CreateGame(int userId, BoardSize boardSize, double turnMinutes)
+        public string? CreateMultiPlayerGame(int userId, BoardSize boardSize, double turnMinutes)
         {
             var game = GetGameOfUser(userId);
             if (game != null)
@@ -30,7 +31,21 @@ namespace Backend.Services
                 gameCode = GenerateGameCode();
             }
 
-            var newGame = new Game(this, gameCode, boardSize, turnMinutes);
+            var newGame = new Game(this, gameCode, GameType.MultiPlayer, boardSize, turnMinutes);
+            Games.TryAdd(gameCode, newGame);
+
+            return gameCode;
+        }
+
+        public string CreateSinglePlayerGame(BoardSize boardSize, GameDifficulty difficulty)
+        {
+            string gameCode = GenerateGameCode();
+            while (Games.ContainsKey(gameCode))
+            {
+                gameCode = GenerateGameCode();
+            }
+
+            var newGame = new Game(this, gameCode, GameType.SinglePlayer, boardSize, difficulty);
             Games.TryAdd(gameCode, newGame);
 
             return gameCode;
@@ -91,7 +106,12 @@ namespace Backend.Services
             return Games.Values.FirstOrDefault(g => g.Players.Any(p => p?.UserId == userId));
         }
 
-        public InitialGameData? GetInitialGameData(string gameCode, int userId)
+        public Game? GetGameOfClient(string connectionId)
+        {
+            return Games.Values.FirstOrDefault(g => g.Players.Any(p => p?.ConnectionId == connectionId));
+        }
+
+        public object? GetInitialGameData(string gameCode, int? userId)
         {
             if (!Games.TryGetValue(gameCode, out var game))
             {
@@ -101,24 +121,42 @@ namespace Backend.Services
             int ownPlayerId = -1;
             string? otherPlayerName = null;
 
-            foreach (var (player, index) in game.Players.Select((player, index) => (player, index)))
+            if (userId == null)
             {
-                if (player?.UserId == userId)
+                ownPlayerId = 0;
+                otherPlayerName = "Bot";
+            }
+            else
+            {
+                foreach (var (player, index) in game.Players.Select((player, index) => (player, index)))
                 {
-                    ownPlayerId = index;
-                }
-                else
-                {
-                    otherPlayerName = player?.Name;
+                    if (player?.UserId == userId)
+                    {
+                        ownPlayerId = index;
+                    }
+                    else
+                    {
+                        otherPlayerName = player?.Name;
+                    }
                 }
             }
 
-            return new InitialGameData(ownPlayerId, otherPlayerName, game.State, game.Board.Cells, [(int)game.Player1TimeRemaining.TotalSeconds, (int)game.Player2TimeRemaining.TotalSeconds]);
+            if (game.Type == GameType.MultiPlayer)
+            {
+                return new InitialMultiGameData(game.Type, ownPlayerId, otherPlayerName, game.State, game.Board.Cells, game.RemainingTimes);
+            }
+
+            return new InitialSingleGameData(game.Type, ownPlayerId, otherPlayerName, game.State, game.Board.Cells);
         }
 
         public async Task<bool> TryJoinRoom(string gameCode, Player player)
         {
-            return Games.TryGetValue(gameCode, out var game) && await game.TryJoin(player);
+            Games.TryGetValue(gameCode, out var game);
+            if (game == null || (game.Type == GameType.MultiPlayer && player.UserId == null))
+            {
+                return false;
+            }
+            return await game.TryJoin(player);
         }
 
         public async Task NotifyGroupAsync(string gameCode, string eventName, object data)

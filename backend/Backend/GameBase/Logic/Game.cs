@@ -1,47 +1,90 @@
-﻿using Backend.GameBase.Entities;
+﻿using AI.Abstractions;
+using Backend.GameBase.Entities;
 using Backend.Services;
 
 namespace Backend.GameBase.Logic
 {
-    public class Game(GameService gameService, string GameCode, BoardSize boardSize, double turnMinutes) : IDisposable
+    public class Game : IDisposable
     {
-        private readonly GameService _gameService = gameService;
-        public GameBoard Board { get; } = new(boardSize);
+        private readonly GameService _gameService;
+        public string GameCode { get; }
+        public GameDifficulty Difficulty { get; }
 
+        public GameBoard Board { get; }
         public Player?[] Players { get; } = new Player[2];
         public int PlayerCount => Players.Count(p => p != null);
         private int FirstReadyPlayerId { get; set; } = -1;
 
         public GameState State { get; private set; } = GameState.Waiting;
 
-        public TimeSpan Player1TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
-        public TimeSpan Player2TimeRemaining { get; set; } = TimeSpan.FromMinutes(turnMinutes);
+        private TimeSpan Player1TimeRemaining { get; set; }
+        private TimeSpan Player2TimeRemaining { get; set; }
+        public int[] RemainingTimes => [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds];
 
         public DateTime MatchStartTimeUtc { get; set; }
         public DateTime MatchEndTimeUtc { get; set; }
         private Timer? TimeoutTimer { get; set; }
 
         public Player? Winner { get; private set; } = null;
+        public GameType Type { get; }
+
+        public Game(GameService gameService, string gameCode, GameType gameType, BoardSize boardSize, double turnMinutes)
+        {
+            _gameService = gameService;
+            GameCode = gameCode;
+            Type = gameType;
+            Board = new(boardSize);
+            Player1TimeRemaining = TimeSpan.FromMinutes((double)turnMinutes);
+            Player2TimeRemaining = TimeSpan.FromMinutes((double)turnMinutes);
+        }
+
+        public Game(GameService gameService, string gameCode, GameType gameType, BoardSize boardSize, GameDifficulty difficulty)
+        {
+            _gameService = gameService;
+            GameCode = gameCode;
+            Type = gameType;
+            Board = new(boardSize);
+            Difficulty = difficulty;
+        }
 
         public async Task<bool> TryJoin(Player player)
         {
-            if (Players.Any(p => p?.UserId == player.UserId))
+            if (Type == GameType.MultiPlayer)
             {
-                return true;
-            }
+                if (Players.Any(p => p?.UserId == player.UserId))
+                {
+                    return true;
+                }
 
-            if (PlayerCount < 2)
+                if (PlayerCount < 2)
+                {
+                    Players[PlayerCount] = player;
+                    await _gameService.NotifyGroupAsync(GameCode, "PlayerJoined", player.Name);
+                    return true;
+                }
+            }
+            else if (Type == GameType.SinglePlayer)
             {
-                Players[PlayerCount] = player;
-                await _gameService.NotifyGroupAsync(GameCode, "PlayerJoined", player.Name);
-                return true;
+                if (PlayerCount < 2)
+                {
+                    Players[0] = player;
+                    Players[1] = new Player(null, null, "Bot") { IsReady = true };
+
+                    // Start single player game
+                    MatchStartTimeUtc = DateTime.UtcNow;
+                    await HandlePlayerTurnChange(GameState.Player1Turn);
+                    return true;
+                }
             }
 
             return false;
         }
 
+        // Only available in multiplayer
         public async Task SetPlayerIsReady(int userId)
         {
+            if (State != GameState.Waiting || Type != GameType.MultiPlayer) return;
+
             int playerIndex = Array.FindIndex(Players, p => p?.UserId == userId);
             if (playerIndex == -1) return;
 
@@ -60,6 +103,7 @@ namespace Backend.GameBase.Logic
 
             if (PlayerCount == 2 && otherPlayerIsReady)
             {
+                // Start multiplayer game
                 MatchStartTimeUtc = DateTime.UtcNow;
                 TimeoutTimer = new Timer(CheckTimeout, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
                 var firstPlayerIndex = FirstReadyPlayerId == Players[0]?.UserId ? 0 : 1;
@@ -67,10 +111,10 @@ namespace Backend.GameBase.Logic
             }
         }
 
-        public async Task<string> AttemptMove(int userId, Point start, Point destination)
+        public async Task<string> AttemptMove(int? userId, Point start, Point destination, bool isBot = false)
         {
-            int playerIndex = Array.FindIndex(Players, p => p?.UserId == userId);
-            if (playerIndex == -1 || playerIndex == 0 && State != GameState.Player1Turn || playerIndex == 1 && State != GameState.Player2Turn)
+            int playerIndex = userId != null ? Array.FindIndex(Players, p => p?.UserId == userId) : !isBot ? 0 : 1;
+            if ((playerIndex == -1 || playerIndex == 0 && State != GameState.Player1Turn || playerIndex == 1 && State != GameState.Player2Turn) && !isBot)
             {
                 return "NotYourTurn";
             }
@@ -100,10 +144,23 @@ namespace Backend.GameBase.Logic
         private async Task HandlePlayerTurnChange(GameState state)
         {
             State = state;
-
-            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new GameData(State, Board.Cells, [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds]));
-
             Debug();
+
+            if (Type == GameType.MultiPlayer)
+            {
+                await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new MultiGameData(State, Board.Cells, RemainingTimes));
+            }
+            else if (Type == GameType.SinglePlayer)
+            {
+                await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new SingleGameData(State, Board.Cells));
+
+                if (state == GameState.Player2Turn)
+                {
+                    // TODO: Get AI move
+                    await Task.Delay(1000);
+                    await AttemptMove(null, new Point(4, 4), new Point(3, 3), true);
+                }
+            }
         }
 
         private DateTime? LastTimeoutCheckedTime;
@@ -143,10 +200,17 @@ namespace Backend.GameBase.Logic
             MatchEndTimeUtc = DateTime.UtcNow;
             State = GameState.Ended;
             Winner = result == GameResult.Player1Won ? Players[0] : result == GameResult.Player2Won ? Players[1] : null;
-            await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalGameData(result, State, Board.Cells, [(int)Player1TimeRemaining.TotalSeconds, (int)Player2TimeRemaining.TotalSeconds]));
-            Console.WriteLine("Saving match data...");
+
+            if (Type == GameType.MultiPlayer)
+            {
+                await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalMultiGameData(result, State, Board.Cells, RemainingTimes));
+            }
+            else if (Type == GameType.SinglePlayer)
+            {
+                await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalSingleGameData(result, State, Board.Cells));
+            }
+
             await _gameService.SaveMatchData(GameCode);
-            Console.WriteLine("Match data saved!");
             await _gameService.RemoveGame(GameCode);
 
             Debug();
@@ -154,10 +218,14 @@ namespace Backend.GameBase.Logic
 
         private void Debug()
         {
+
             Console.WriteLine($"State: {State}");
             Board.Debug();
-            Console.WriteLine("Player1TimeRemaining: " + Math.Round(Player1TimeRemaining.TotalSeconds) + "s");
-            Console.WriteLine("Player2TimeRemaining: " + Math.Round(Player2TimeRemaining.TotalSeconds) + "s");
+            if (Type == GameType.MultiPlayer)
+            {
+                Console.WriteLine("Player1TimeRemaining: " + Math.Round(Player1TimeRemaining.TotalSeconds) + "s");
+                Console.WriteLine("Player2TimeRemaining: " + Math.Round(Player2TimeRemaining.TotalSeconds) + "s");
+            }
             Console.WriteLine();
         }
 

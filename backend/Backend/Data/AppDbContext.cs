@@ -1,4 +1,4 @@
-﻿using Backend.GameBase.Entities;
+﻿using AI.Abstractions;
 using Backend.GameBase.Serialization;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;

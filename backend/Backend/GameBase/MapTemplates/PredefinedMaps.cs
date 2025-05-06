@@ -1,4 +1,5 @@
-﻿using Backend.GameBase.Entities;
+﻿using AI.Abstractions;
+using Backend.GameBase.Entities;
 
 namespace Backend.GameBase.MapTemplates
 {

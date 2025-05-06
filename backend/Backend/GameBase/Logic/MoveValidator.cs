@@ -1,4 +1,4 @@
-﻿using Backend.GameBase.Entities;
+﻿using AI.Abstractions;
 
 namespace Backend.GameBase.Logic
 {

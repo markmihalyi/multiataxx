@@ -1,4 +1,5 @@
-﻿using Backend.DTOs;
+﻿using AI.Abstractions;
+using Backend.DTOs;
 using Backend.GameBase.Entities;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,36 +17,64 @@ namespace Backend.Controllers
         private readonly GameService _gameService = gameService;
 
         /// <summary>
-        /// Create new game
+        /// Create new single/multiplayer game
         /// </summary>
         /// <param name="body">Data required to create a game</param>
         /// <response code="200">If the game is created successfully</response>
-        /// <response code="409">If the user already has a game in progress</response>
+        /// <response code="400">If the request body is invalid</response>
+        /// <response code="401">If user is not logged in when creating a multiplayer game</response>
+        /// <response code="409">If a multiplayer game is already in progress for the current user</response>
         [HttpPost]
-        [Authorize]
         [ProducesResponseType(typeof(CreateGameResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public IActionResult CreateGame([FromBody] CreateGameRequestBody body)
         {
+            if (!Enum.TryParse<GameType>(body.GameType, true, out var gameType))
+            {
+                return BadRequest(new ErrorResponse("Game type is invalid."));
+            }
+
             if (!Enum.TryParse<BoardSize>(body.BoardSize, true, out var boardSize))
             {
                 return BadRequest(new ErrorResponse("Board size is invalid."));
             }
 
-            if (body.TurnMinutes < 0.5 || body.TurnMinutes > 30)
+            if (gameType == GameType.MultiPlayer)
             {
-                return BadRequest(new ErrorResponse("Turn minutes parameter is invalid."));
-            }
+                var userIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdentifier == null)
+                {
+                    return Unauthorized(new ErrorResponse("Login is required for multiplayer mode."));
+                }
 
-            int userId = Convert.ToInt32(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
-            var gameCode = _gameService.CreateGame(userId, boardSize, body.TurnMinutes);
-            if (gameCode == null)
+                if (body.TurnMinutes == null || body.TurnMinutes < 0.5 || body.TurnMinutes > 30)
+                {
+                    return BadRequest(new ErrorResponse("Turn minutes parameter is invalid."));
+                }
+
+                int userId = Convert.ToInt32(userIdentifier?.Value);
+                var gameCode = _gameService.CreateMultiPlayerGame(userId, boardSize, (double)body.TurnMinutes);
+                if (gameCode == null)
+                {
+                    return Conflict(new ErrorResponse("You already have a game in progress."));
+                }
+                return Ok(new CreateGameResponse("You have created a multiplayer game.", gameCode));
+            }
+            else if (gameType == GameType.SinglePlayer)
             {
-                return Conflict(new ErrorResponse("You already have a game in progress."));
+                if (!Enum.TryParse<GameDifficulty>(body.Difficulty, true, out var difficulty))
+                {
+                    return BadRequest(new ErrorResponse("Game type is invalid."));
+                }
+
+                var gameCode = _gameService.CreateSinglePlayerGame(boardSize, difficulty);
+                return Ok(new CreateGameResponse("You have created a single player game.", gameCode));
             }
-
-            return Ok(new CreateGameResponse("You have created a new game.", gameCode));
-
+            else
+            {
+                return BadRequest(new ErrorResponse("Game type is invalid."));
+            }
         }
 
         /// <summary>
@@ -67,6 +96,7 @@ namespace Backend.Controllers
         /// </summary>
         /// <param name="matchId">The ID of the match to retrieve details for</param>
         /// <response code="200">If the match details are successfully retrieved</response>
+        /// <response code="400">If an invalid match ID is provided</response>
         /// <response code="404">If no match with the given ID is found</response>
         [HttpGet("history/{matchId}")]
         [Authorize]
@@ -74,8 +104,13 @@ namespace Backend.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMatchDetails(string matchId)
         {
+            if (!Guid.TryParse(matchId, out var matchGuid))
+            {
+                return BadRequest(new ErrorResponse("Invalid match ID provided."));
+            }
+
             int userId = Convert.ToInt32(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
-            var matchDetails = await _gameService.GetMatchDetails(userId, Guid.Parse(matchId));
+            var matchDetails = await _gameService.GetMatchDetails(userId, matchGuid);
             if (matchDetails == null)
             {
                 return NotFound(new ErrorResponse("Match not found."));
