@@ -21,12 +21,12 @@ import useSocket from "../common/hooks/useSocket";
 function Game() {
 	const { socket, connect, joinGame, sendPlayerIsReady } = useSocket();
 	const { username } = useAuth();
+	const [searchParams] = useSearchParams();
 
 	const [connected, setConnected] = useState(false);
 	const [subscribed, setSubscribed] = useState(false);
 	const [joined, setJoined] = useState(false);
 	const [showError, setShowError] = useState(false);
-	const [searchParams] = useSearchParams();
 
 	const [ownPlayerId, setOwnPlayerId] = useState<number>(-1);
 	const [otherPlayerName, setOtherPlayerName] = useState<string | null>(null);
@@ -117,11 +117,17 @@ function Game() {
 
 		intervalRef.current = setInterval(() => {
 			setTimeRemaining((times) => {
-				if (times === null) return [];
+				if (times === null) return times;
 				const player1NewTime =
 					gameState === "Player1Turn" ? times[0] - 1 : times[0];
 				const player2NewTime =
 					gameState === "Player2Turn" ? times[1] - 1 : times[1];
+				if (
+					player1NewTime === times[0] &&
+					player2NewTime === times[1]
+				) {
+					return times;
+				}
 				return [player1NewTime, player2NewTime];
 			});
 		}, 1000);
@@ -144,6 +150,7 @@ function Game() {
 					<Ready
 						buttonHandle={handlePlayerIsReady}
 						isReady={playerIsReady}
+						gameCode={searchParams.get("code") ?? ""}
 					/>
 				) : (
 					cells != null && (
