@@ -1,0 +1,34 @@
+import { CellState } from "./constants";
+
+export type ApiResponse = {
+	success: boolean;
+	message: string;
+};
+
+export type HostGameApiResponse = ApiResponse & { gameCode: string };
+
+export type MeApiResponse = { id: number; username: string };
+
+export type JoinSuccessfulResponse = {
+	ownPlayerId: number;
+	otherPlayerName: string | null;
+	state: GameState;
+	cells: CellState[][];
+	timeRemaining: number[];
+};
+
+export type GameStateChangedResponse = {
+	state: GameState;
+	cells: CellState[][];
+	timeRemaining: number[];
+	gameResult?: GameResult;
+};
+
+export type GameState = "Waiting" | "Player1Turn" | "Player2Turn" | "Ended";
+
+export type GameResult = "Draw" | "Player1Won" | "Player2Won";
+
+export type CellPosition = {
+	row: number;
+	col: number;
+};

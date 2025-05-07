@@ -1,10 +1,11 @@
 import "../styles/Popup.css";
 
+import { NavLink, useNavigate } from "react-router";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { ApiResponse } from "../types";
 import { FaUnlockAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
-import { NavLink, useNavigate } from "react-router";
 import api from "../api";
 import { handleAxiosError } from "../api";
 import useAuth from "../common/hooks/useAuth";
@@ -23,7 +24,12 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [inputError, setInputError] = useState<boolean>(false);
 
-	const { isLoggedIn, setIsLoggedIn } = useAuth();
+	const {
+		isLoggedIn,
+		setIsLoggedIn,
+		updateUserData,
+		username: authUsername,
+	} = useAuth();
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault(); //prevent reloading
@@ -38,8 +44,8 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 			setErrorMessage(null);
 			setIsOpen(false);
 
-			setTimeout(() => {
-				setIsLoggedIn(true);
+			setTimeout(async () => {
+				await updateUserData();
 				navigate("/");
 			}, 320);
 		} catch (error) {
@@ -184,7 +190,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					</div>
 					<p>User logged in:</p>
 					<p id="p-bottom">
-						<b>bob</b>
+						<b>{authUsername}</b>
 					</p>
 					<button className="loginButton" onClick={handleLogOut}>
 						Log out
