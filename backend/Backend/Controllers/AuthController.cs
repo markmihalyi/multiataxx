@@ -134,7 +134,7 @@ public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authS
     }
 
     /// <summary>
-    /// Get user details
+    /// Get details of user
     /// </summary>
     /// <response code="200">If the request was successful</response>
     /// <response code="401">If the user is not logged in</response>

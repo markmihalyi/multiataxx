@@ -12,6 +12,7 @@ namespace Backend.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Match> Matches { get; set; }
+        public DbSet<UserStatistics> UserStatistics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

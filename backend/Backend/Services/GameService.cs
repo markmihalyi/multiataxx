@@ -91,6 +91,18 @@ namespace Backend.Services
             return new MatchDetails(matchData.Id, matchResult, [playerOne.Username, playerTwo.Username], matchData.Steps);
         }
 
+        public async Task<UserStatistics> GetUserStatistics(int userId)
+        {
+            var statistics = await _scopedExecutor.RunInScope(async dbContext =>
+                await dbContext.UserStatistics.Where(s => s.UserId == userId).FirstOrDefaultAsync()
+            );
+            if (statistics == null)
+            {
+                return new UserStatistics(userId);
+            }
+            return statistics;
+        }
+
         public async Task<bool> RemoveGame(string gameCode)
         {
             await RemoveAllConnectionsFromGroup(gameCode);
@@ -165,39 +177,94 @@ namespace Backend.Services
             await _hubContext.Clients.Group(gameCode).SendAsync(eventName, data);
         }
 
-        public async Task SaveMatchData(string gameCode)
+        public async Task<Match?> SaveMatchData(string gameCode)
         {
-            try
+            if (!Games.TryGetValue(gameCode, out var game) || game.PlayerCount != 2)
             {
-                if (!Games.TryGetValue(gameCode, out var game) || game.PlayerCount != 2)
+                return null;
+            }
+
+            var matchData = new Match()
+            {
+                Id = Guid.NewGuid(),
+                PlayerOneUserId = game.Players[0]?.UserId ?? -1,
+                PlayerTwoUserId = game.Players[1]?.UserId ?? -1,
+                WinnerUserId = game.Winner?.UserId,
+                Steps = game.Board.Steps,
+                Date = game.MatchEndTimeUtc,
+                Duration = (int)(game.MatchEndTimeUtc - game.MatchStartTimeUtc).TotalSeconds
+            };
+
+            Console.WriteLine("Saving match data to the database...");
+            await _scopedExecutor.RunInScope(async dbContext =>
+            {
+                dbContext.Matches.Add(matchData);
+                await dbContext.SaveChangesAsync();
+            });
+            Console.WriteLine("Match data saved successfully.");
+
+            return matchData;
+        }
+
+        public async Task SaveStatistics(Match? matchData)
+        {
+            if (matchData == null) return;
+
+            Console.WriteLine("Saving statistics to the database...");
+            await _scopedExecutor.RunInScope(async dbContext =>
+            {
+                int? player1UserId = matchData.PlayerOneUserId;
+                int? player2UserId = matchData.PlayerTwoUserId;
+                if (player1UserId == -1 || player2UserId == -1) return;
+
+                var userStatistics1 = await dbContext.UserStatistics.Where(s => s.UserId == player1UserId).FirstOrDefaultAsync();
+                if (userStatistics1 == null)
                 {
-                    return;
+                    userStatistics1 = new UserStatistics((int)player1UserId);
+                    dbContext.UserStatistics.Add(userStatistics1);
                 }
 
-                var matchData = new Match()
+                var userStatistics2 = await dbContext.UserStatistics.Where(s => s.UserId == player2UserId).FirstOrDefaultAsync();
+                if (userStatistics2 == null)
                 {
-                    Id = Guid.NewGuid(),
-                    PlayerOneUserId = game.Players[0]?.UserId ?? -1,
-                    PlayerTwoUserId = game.Players[1]?.UserId ?? -1,
-                    WinnerUserId = game.Winner?.UserId,
-                    Steps = game.Board.Steps,
-                    Date = game.MatchEndTimeUtc,
-                    Duration = (int)(game.MatchEndTimeUtc - game.MatchStartTimeUtc).TotalSeconds
-                };
+                    userStatistics2 = new UserStatistics((int)player2UserId);
+                    dbContext.UserStatistics.Add(userStatistics2);
+                }
 
-                Console.WriteLine("Saving match data to the database...");
-                await _scopedExecutor.RunInScope(async dbContext =>
+                if (matchData.WinnerUserId == player1UserId)
                 {
-                    dbContext.Matches.Add(matchData);
-                    await dbContext.SaveChangesAsync();
-                });
-                Console.WriteLine("Match data saved successfully.");
+                    userStatistics1.Wins++;
+                    userStatistics2.Losses++;
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred while saving match data: {ex.Message}");
-            }
+                    if (userStatistics1.FastestWinTime == null || userStatistics1.FastestWinTime > matchData.Duration)
+                    {
+                        userStatistics1.FastestWinTime = matchData.Duration;
+                    }
+                }
+                else if (matchData.WinnerUserId == player2UserId)
+                {
+                    userStatistics2.Wins++;
+                    userStatistics1.Losses++;
+
+                    if (userStatistics2.FastestWinTime == null || userStatistics2.FastestWinTime > matchData.Duration)
+                    {
+                        userStatistics2.FastestWinTime = matchData.Duration;
+                    }
+                }
+                else
+                {
+                    userStatistics1.Draws++;
+                    userStatistics2.Draws++;
+                }
+
+                userStatistics1.TotalTimePlayed += matchData.Duration;
+                userStatistics2.TotalTimePlayed += matchData.Duration;
+                userStatistics1.AverageGameDuration = userStatistics1.TotalTimePlayed / (userStatistics1.Wins + userStatistics1.Losses + userStatistics1.Draws);
+                userStatistics2.AverageGameDuration = userStatistics2.TotalTimePlayed / (userStatistics1.Wins + userStatistics1.Losses + userStatistics1.Draws);
+
+                await dbContext.SaveChangesAsync();
+            });
+            Console.WriteLine("Statistics saved successfully.");
         }
 
         private async Task RemoveAllConnectionsFromGroup(string gameCode)

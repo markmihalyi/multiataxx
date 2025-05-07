@@ -211,7 +211,8 @@ namespace Backend.GameBase.Logic
             if (Type == GameType.MultiPlayer)
             {
                 await _gameService.NotifyGroupAsync(GameCode, "GameStateChanged", new FinalMultiGameData(result, State, Board.Cells, RemainingTimes));
-                await _gameService.SaveMatchData(GameCode);
+                var matchData = await _gameService.SaveMatchData(GameCode);
+                await _gameService.SaveStatistics(matchData);
             }
             else if (Type == GameType.SinglePlayer)
             {
