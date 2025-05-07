@@ -6,6 +6,7 @@ import Dropdown from "../components/Dropdown";
 import useAuth from "../common/hooks/useAuth";
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import { ApiResponse, HostGameApiResponse } from "../types";
 
 type PanelProps = {
 	panelTitle: string;
