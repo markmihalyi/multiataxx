@@ -3,6 +3,7 @@ import * as signalR from "@microsoft/signalr";
 import { createContext, useState } from "react";
 
 import { API_BASE_URL } from "../../api";
+import { CellPosition } from "../../types";
 
 export interface ISocketContext {
 	socket: signalR.HubConnection | null;
@@ -10,10 +11,8 @@ export interface ISocketContext {
 	joinGame: (gameCode: string) => Promise<void>;
 	sendPlayerIsReady: () => Promise<void>;
 	attemptMove: (
-		startX: number,
-		startY: number,
-		destX: number,
-		destY: number
+		startPosition: CellPosition,
+		destPosition: CellPosition
 	) => Promise<void>;
 }
 
@@ -44,13 +43,17 @@ const SocketContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 	};
 
 	const attemptMove = async (
-		startX: number,
-		startY: number,
-		destX: number,
-		destY: number
+		startPosition: CellPosition,
+		destPoisiton: CellPosition
 	) => {
 		if (socket === null) return;
-		await socket.invoke("AttemptMove", [startX, startY, destX, destY]);
+		await socket.invoke(
+			"AttemptMove",
+			startPosition.row + 1,
+			startPosition.col + 1,
+			destPoisiton.row + 1,
+			destPoisiton.col + 1
+		);
 	};
 
 	return (

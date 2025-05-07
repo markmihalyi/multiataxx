@@ -1,19 +1,28 @@
 import "../styles/Error&Ready.css";
 
-import { useEffect, useState } from "react";
+import {
+	GameResult,
+	GameState,
+	GameStateChangedResponse,
+	JoinSuccessfulResponse,
+} from "../types";
+import { useEffect, useRef, useState } from "react";
 
+import { CellState } from "../constants";
 import Error from "../components/Error";
 import Navbar from "../layouts/Navbar";
 import Ready from "../components/Ready";
 import Table from "../components/Table";
 import ThreeDotLoading from "../components/ThreeDotLoading";
+import useAuth from "../common/hooks/useAuth";
 import { useSearchParams } from "react-router";
 import useSocket from "../common/hooks/useSocket";
 
 function Game() {
-	const { socket, connect, joinGame, sendPlayerIsReady /*, attemptMove */ } =
-		useSocket();
+	const { socket, connect, joinGame, sendPlayerIsReady } = useSocket();
+	const { username } = useAuth();
 
+	const [connected, setConnected] = useState(false);
 	const [subscribed, setSubscribed] = useState(false);
 	const [joined, setJoined] = useState(false);
 	const [showError, setShowError] = useState(false);
@@ -31,6 +40,7 @@ function Game() {
 		async function connectToHub() {
 			try {
 				await connect();
+				setConnected(true);
 				console.log("✅ SignalR connection estabilished.");
 			} catch (error) {
 				setShowError(true);
@@ -56,6 +66,7 @@ function Game() {
 
 		socket.on("JoinFailed", () => {
 			console.log("JoinFailed");
+			socket.stop();
 			setShowError(true);
 		});
 
@@ -78,13 +89,20 @@ function Game() {
 	}, [socket]);
 
 	useEffect(() => {
-		if (subscribed) {
+		if (connected && subscribed) {
 			const gameCode = searchParams.get("code");
 			if (!gameCode) return;
 			joinGame(gameCode);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [subscribed]);
+	}, [connected, subscribed]);
+
+	useEffect(() => {
+		if (socket !== null && gameResult !== null) {
+			socket.stop();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [gameResult]);
 
 	const handlePlayerIsReady = async () => {
 		if (!playerIsReady) {
@@ -92,6 +110,29 @@ function Game() {
 			setPlayerIsReady(true);
 		}
 	};
+
+	const intervalRef = useRef<number | null>(null);
+	useEffect(() => {
+		if (timeRemaining === null || gameResult !== null) return;
+
+		intervalRef.current = setInterval(() => {
+			setTimeRemaining((times) => {
+				if (times === null) return [];
+				const player1NewTime =
+					gameState === "Player1Turn" ? times[0] - 1 : times[0];
+				const player2NewTime =
+					gameState === "Player2Turn" ? times[1] - 1 : times[1];
+				return [player1NewTime, player2NewTime];
+			});
+		}, 1000);
+
+		return () => {
+			if (intervalRef.current !== null) {
+				clearInterval(intervalRef.current);
+			}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [timeRemaining]);
 
 	return (
 		<>
@@ -105,7 +146,40 @@ function Game() {
 						isReady={playerIsReady}
 					/>
 				) : (
-					cells != null && <Table cells={cells} />
+					cells != null && (
+						<>
+							<div>
+								<p style={{ color: "black" }}>
+									{ownPlayerId === 0
+										? username
+										: otherPlayerName}
+								</p>
+								<p style={{ color: "black" }}>
+									P1 time:{" "}
+									{timeRemaining !== null
+										? timeRemaining[0]
+										: "-"}
+								</p>
+							</div>
+							<Table
+								cells={cells}
+								ownCellState={ownPlayerId + 1}
+							/>
+							<div>
+								<p style={{ color: "black" }}>
+									{ownPlayerId === 1
+										? username
+										: otherPlayerName}
+								</p>
+								<p style={{ color: "black" }}>
+									P2 time:{" "}
+									{timeRemaining !== null
+										? timeRemaining[1]
+										: "-"}
+								</p>
+							</div>
+						</>
+					)
 				)}
 			</div>
 		</>
