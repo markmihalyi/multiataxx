@@ -1,4 +1,5 @@
-﻿using Backend.GameBase.Entities;
+﻿using AI.Abstractions;
+using Backend.GameBase.Entities;
 using Backend.GameBase.Logic;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -6,9 +7,10 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Hubs
 {
-    public class GameHub(GameService gameService) : Hub
+    public class GameHub(GameService gameService, IGameAI gameAI) : Hub
     {
         private readonly GameService _gameService = gameService;
+        private readonly IGameAI _gameAI = gameAI;
 
         public async Task JoinGame(string gameCode)
         {
@@ -38,7 +40,7 @@ namespace Backend.Hubs
             int userId = Convert.ToInt32(Context?.UserIdentifier);
             if (Context == null || userId == 0) return;
 
-            var game = _gameService.GetGameOfClient(Context.ConnectionId);
+            var game = _gameService.GetGameOfUser(userId);
             if (game == null) return;
 
             await game.SetPlayerIsReady(userId);
@@ -56,6 +58,40 @@ namespace Backend.Hubs
             if (status == "MoveCompleted") return;
 
             await Clients.Caller.SendAsync(status);
+        }
+
+        [Authorize]
+        public async Task UseBooster(int boosterId)
+        {
+            int userId = Convert.ToInt32(Context?.UserIdentifier);
+            if (Context == null || userId == 0) return;
+
+            var game = _gameService.GetGameOfUser(userId);
+            if (game == null) return;
+
+            CellState playerCellState = game.Players[0]?.UserId == userId ? CellState.Player1 : CellState.Player2;
+            if ((game.State == GameState.Player1Turn && playerCellState == CellState.Player2) || (game.State == GameState.Player2Turn && playerCellState == CellState.Player1))
+            {
+                await Clients.Caller.SendAsync("NotYourTurn");
+                return;
+            }
+
+            var booster = await _gameService.GetBoosterById(boosterId);
+            if (booster == null)
+            {
+                await Clients.Caller.SendAsync("BoosterNotExists");
+                return;
+            }
+
+            bool canUse = await _gameService.UseBooster(userId, boosterId);
+            if (!canUse)
+            {
+                await Clients.Caller.SendAsync("BoosterNotAvailable");
+                return;
+            }
+
+            var (startX, startY, destX, destY) = _gameAI.CalculateBotMove(game.Board.Cells, playerCellState, (BoardSize)game.Board.Size, (GameDifficulty)booster.Action);
+            await Clients.Caller.SendAsync("TipReceived", startX, startY, destX, destY);
         }
     }
 }

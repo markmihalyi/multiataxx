@@ -14,6 +14,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    Stripe.StripeConfiguration.ApiKey = "sk_test_51RMFsCQY4iF3m01oozdg5tlsNe9bYSL73JKYdCEWRyeHpPv7HdSYM0tjJcrq2FMeruL3nUYYAivccvP39tcUUf5900XzgHbnfE";
+
     // Fejlesztői környezettől függően appsettings.json kialakítása 
     if (Debugger.IsAttached)
     {

@@ -13,6 +13,8 @@ namespace Backend.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Match> Matches { get; set; }
         public DbSet<UserStatistics> UserStatistics { get; set; }
+        public DbSet<Booster> Boosters { get; set; }
+        public DbSet<OwnedBooster> OwnedBoosters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +37,9 @@ namespace Backend.Data
                 .Property(e => e.Steps)
                 .HasConversion(converter)
                 .Metadata.SetValueComparer(comparer);
+
+            modelBuilder.Entity<OwnedBooster>()
+                .HasKey(ob => new { ob.UserId, ob.BoosterId });
         }
 
     }

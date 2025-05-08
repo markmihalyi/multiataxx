@@ -11,7 +11,7 @@ BEGIN
 END
 GO
 
-
+-- Initialize database
 USE [MultiAtaxx]
 GO
 /****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 05. 05. 22:08:40 ******/
@@ -116,3 +116,13 @@ REFERENCES [dbo].[Users] ([Id])
 GO
 ALTER TABLE [dbo].[UserStatistics] CHECK CONSTRAINT [FK_statistics_accounts1]
 GO
+
+-- Insert boosters
+INSERT INTO [dbo].[Boosters]([Name],[Price],[Action])
+VALUES ('Tip', 0.5, 2)
+
+INSERT INTO [dbo].[Boosters]([Name],[Price],[Action])
+VALUES ('Smart Tip', 1, 3)
+
+INSERT INTO [dbo].[Boosters]([Name],[Price],[Action])
+VALUES ('Pro Tip', 2, 4)

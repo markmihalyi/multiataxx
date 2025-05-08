@@ -124,6 +124,73 @@ namespace Backend.Services
             return Games.Values.FirstOrDefault(g => g.Players.Any(p => p?.ConnectionId == connectionId));
         }
 
+        public async Task<Booster?> GetBoosterById(int boosterId)
+        {
+            return await _scopedExecutor.RunInScope(async dbContext =>
+                await dbContext.Boosters.Where(b => b.Id == boosterId).FirstOrDefaultAsync()
+            );
+        }
+
+        public async Task<List<UserBoosterData>> GetBoostersOfUser(int userId)
+        {
+            return await _scopedExecutor.RunInScope(async dbContext =>
+                await dbContext.OwnedBoosters
+                .Where(b => b.UserId == userId && b.Amount > 0)
+                .Select(b => new UserBoosterData(b.BoosterId, b.Booster.Name, b.Amount))
+                .ToListAsync()
+            );
+        }
+
+        public async Task<List<StoreBoosterData>> GetAllBoosters()
+        {
+            return await _scopedExecutor.RunInScope(async dbContext =>
+                await dbContext.Boosters.Select(b => new StoreBoosterData(b.Id, b.Name, b.Price)).ToListAsync()
+            );
+        }
+
+        public async Task<bool> UseBooster(int userId, int boosterId)
+        {
+            return await _scopedExecutor.RunInScope(async dbContext =>
+            {
+                var b = await dbContext.OwnedBoosters.Where(b => b.UserId == userId && b.BoosterId == boosterId && b.Amount > 0).FirstOrDefaultAsync();
+                if (b != null)
+                {
+                    b.Amount--;
+                    await dbContext.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        public async Task<bool> AddBoosterToUser(int userId, int boosterId, int amount)
+        {
+            var booster = await GetBoosterById(boosterId);
+            if (booster == null) return false;
+
+            await _scopedExecutor.RunInScope(async dbContext =>
+            {
+                var b = await dbContext.OwnedBoosters.Where(b => b.UserId == userId && b.BoosterId == boosterId).FirstOrDefaultAsync();
+                if (b != null)
+                {
+                    b.Amount += amount;
+                }
+                else
+                {
+                    var newOwnedBooster = new OwnedBooster()
+                    {
+                        UserId = userId,
+                        BoosterId = boosterId,
+                        Amount = amount
+                    };
+                    dbContext.OwnedBoosters.Add(newOwnedBooster);
+                }
+                await dbContext.SaveChangesAsync();
+            });
+
+            return true;
+        }
+
         public object? GetInitialGameData(string gameCode, int? userId)
         {
             if (!Games.TryGetValue(gameCode, out var game))

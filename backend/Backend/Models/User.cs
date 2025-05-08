@@ -16,5 +16,8 @@ namespace Backend.Models
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
         public int Balance { get; set; }
+
+        // navigation properties
+        public List<OwnedBooster> OwnedBoosters { get; set; } = [];
     }
 }

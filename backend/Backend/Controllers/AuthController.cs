@@ -95,6 +95,32 @@ public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authS
     }
 
     /// <summary>
+    /// Get details of user
+    /// </summary>
+    /// <response code="200">If the request was successful</response>
+    /// <response code="401">If the user is not logged in</response>
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetUserDetails()
+    {
+        var userIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdentifier == null)
+        {
+            return Unauthorized(new ErrorResponse("You are not logged in."));
+        }
+
+        int userId = Convert.ToInt32(userIdentifier.Value);
+        var user = await _authService.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return Unauthorized(new ErrorResponse("You are not logged in."));
+        }
+
+        return Ok(new UserDetailsResponse(user.Id, user.Username));
+    }
+
+    /// <summary>
     /// Refresh user access token
     /// </summary>
     /// <response code="200">If access token generation is successful</response>
@@ -131,32 +157,6 @@ public class AuthController(IOptions<TokenConfig> tokenConfig, AuthService authS
 
 
         return Ok(new SuccessResponse("A new access token has been generated."));
-    }
-
-    /// <summary>
-    /// Get details of user
-    /// </summary>
-    /// <response code="200">If the request was successful</response>
-    /// <response code="401">If the user is not logged in</response>
-    [HttpGet("me")]
-    [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetUserDetails()
-    {
-        var userIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (userIdentifier == null)
-        {
-            return Unauthorized(new ErrorResponse("You are not logged in."));
-        }
-
-        int userId = Convert.ToInt32(userIdentifier.Value);
-        var user = await _authService.GetUserByIdAsync(userId);
-        if (user == null)
-        {
-            return Unauthorized(new ErrorResponse("You are not logged in."));
-        }
-
-        return Ok(new UserDetailsResponse(user.Id, user.Username));
     }
 
     /// <summary>

@@ -78,6 +78,29 @@ namespace Backend.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Get boosters of user
+        /// </summary>
+        /// <response code="200">If the request was successful</response>
+        /// <response code="401">If the user is not logged in</response>
+        [HttpGet("boosters")]
+        [Authorize]
+        [ProducesResponseType(typeof(UserStatistics), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetBoostersOfUser()
+        {
+            var userIdentifier = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdentifier == null)
+            {
+                return Unauthorized(new ErrorResponse("You are not logged in."));
+            }
+
+            int userId = Convert.ToInt32(userIdentifier.Value);
+            var boosters = await _gameService.GetBoostersOfUser(userId);
+            return Ok(boosters);
+        }
+
         /// <summary>
         /// Get match history
         /// </summary>
@@ -95,7 +118,7 @@ namespace Backend.Controllers
         /// <summary>
         /// Get details of a specific match
         /// </summary>
-        /// <param name="matchId">The ID of the match to retrieve details for</param>
+        /// <param name="body">Data required to create a game</param>
         /// <response code="200">If the match details are successfully retrieved</response>
         /// <response code="400">If an invalid match ID is provided</response>
         /// <response code="404">If no match with the given ID is found</response>
@@ -103,9 +126,9 @@ namespace Backend.Controllers
         [Authorize]
         [ProducesResponseType(typeof(MatchDetails), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetMatchDetails(string matchId)
+        public async Task<IActionResult> GetMatchDetails([FromBody] GetMatchDetailsRequestBody body)
         {
-            if (!Guid.TryParse(matchId, out var matchGuid))
+            if (!Guid.TryParse(body.MatchId, out var matchGuid))
             {
                 return BadRequest(new ErrorResponse("Invalid match ID provided."));
             }
