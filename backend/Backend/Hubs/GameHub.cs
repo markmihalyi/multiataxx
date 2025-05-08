@@ -91,7 +91,7 @@ namespace Backend.Hubs
             }
 
             var (startX, startY, destX, destY) = _gameAI.CalculateBotMove(game.Board.Cells, playerCellState, (BoardSize)game.Board.Size, (GameDifficulty)booster.Action);
-            await Clients.Caller.SendAsync("TipReceived", startX, startY, destX, destY);
+            await Clients.Caller.SendAsync("TipReceived", startX + 1, startY + 1, destX + 1, destY + 1);
         }
     }
 }
