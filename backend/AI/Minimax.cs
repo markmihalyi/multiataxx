@@ -6,11 +6,15 @@ public class Minimax
     private GameState _gameState;
     private int _maxDepth;
     string memoryFilePath = "memory.json";
-
+    private int maxPlayer = 2;
+    private int minPlayer = 1;
 
     private Dictionary<string, int> _memoria = new Dictionary<string, int>();
-    public Minimax(GameState gameState, int maxDepth)
+    public Minimax(GameState gameState, int maxDepth, int maximazingPlayer = 2)
     {
+        maxPlayer = maximazingPlayer;
+        minPlayer = (maxPlayer == 2) ? 1 : 2;
+
         _gameState = gameState;
         _maxDepth = maxDepth;
 
@@ -62,6 +66,7 @@ public class Minimax
         // Ellenőrizzük, hogy az állapot már szerepel-e a memóban
         if (_memoria.ContainsKey(key))
         {
+
             return _memoria[key];  // Visszaadjuk a memóban tárolt értéket
         }
 
@@ -71,7 +76,7 @@ public class Minimax
             // Maximalizálni kívánt ág
             int maxEval = int.MinValue;
             gameState.SwitchPlayer();
-            foreach (var move in gameState.GeneratePossibleMoves(2))
+            foreach (var move in gameState.GeneratePossibleMoves(maxPlayer))
             {
                 GameState newState = gameState.Clone();
                 newState.MakeMove(move.x, move.y, move.fromx, move.fromy);
@@ -93,7 +98,7 @@ public class Minimax
 
             int minEval = int.MaxValue;
             gameState.SwitchPlayer();
-            foreach (var move in gameState.GeneratePossibleMoves(1))
+            foreach (var move in gameState.GeneratePossibleMoves(minPlayer))
             {
                 //Console.WriteLine($"Játékos Lépés: [{move.fromx}, {move.fromy}] -> [{move.x}, {move.y}]");
                 GameState newState = gameState.Clone();
@@ -118,7 +123,7 @@ public class Minimax
         int maxEval = int.MinValue; // - végtelen
         int alpha = int.MinValue;
         int beta = int.MaxValue;
-        foreach (var move in gameState.GeneratePossibleMoves(2))
+        foreach (var move in gameState.GeneratePossibleMoves(maxPlayer))
         {
             GameState newState = gameState.Clone();
             newState.MakeMove(move.x, move.y, move.fromx, move.fromy);
@@ -140,12 +145,12 @@ public class Minimax
 
     private int Evaluate(GameState gameState)
     {
-        int botScore = gameState.GetPlayerPiecesCount(2);
-        int playerScore = gameState.GetPlayerPiecesCount(1);
+        int botScore = gameState.GetPlayerPiecesCount(maxPlayer);
+        int playerScore = gameState.GetPlayerPiecesCount(minPlayer);
 
         // Pozíció-alapú értékelés
         int botPositionAdvantage = 0;
-        foreach (var (x, y) in gameState.GetPlayerPieces(2))
+        foreach (var (x, y) in gameState.GetPlayerPieces(maxPlayer))
         {
             if (x >= 3 && x <= 5 && y >= 3 && y <= 5) // középső sáv
             {
@@ -154,7 +159,7 @@ public class Minimax
         }
 
         int playerPositionAdvantage = 0;
-        foreach (var (x, y) in gameState.GetPlayerPieces(1))
+        foreach (var (x, y) in gameState.GetPlayerPieces(minPlayer))
         {
             if (x >= 3 && x <= 5 && y >= 3 && y <= 5)
             {
@@ -163,8 +168,8 @@ public class Minimax
         }
 
         // Mozgási lehetőségek (mobilitás)
-        int botMoves = gameState.GeneratePossibleMovesCount(2);
-        int playerMoves = gameState.GeneratePossibleMovesCount(1);
+        int botMoves = gameState.GeneratePossibleMovesCount(maxPlayer);
+        int playerMoves = gameState.GeneratePossibleMovesCount(minPlayer);
 
         // Súlyozott értékelés
         return (10 * botScore + 5 * botPositionAdvantage + 2 * botMoves) -

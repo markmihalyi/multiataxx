@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Drawing;
+using AI.Abstractions;
 
 class Program
 {
@@ -8,11 +10,39 @@ class Program
         GameState gameState = new GameState(5);
         BotService botService = new BotService(gameState, AI.DifficultyLevel.Hard);
 
+        // első oszlop 2. sor
         // A játék futtatása
         while (true)
         {
             Console.Clear();
             DisplayBoard(gameState);
+            /*
+            CellState[,] cells = new CellState[(int)BoardSize.Small, (int)BoardSize.Small]
+            {
+                { CellState.Player1, CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Wall,  CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Player1 }
+            };
+            BotService botservice1 = new BotService();
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    Console.Write((int)cells[i,j]);
+                }
+                Console.WriteLine();
+            }
+            var move = botservice1.CalculateBotMove(cells, CellState.Player1, BoardSize.Small, GameDifficulty.Hard);
+            var move2 = botservice1.CalculateBotMove(cells, CellState.Player2, BoardSize.Small, GameDifficulty.Hard);
+
+            Console.WriteLine($"1es player: {move.startX} {move.startY} --->  {move.destX} {move.destY}");
+            Console.WriteLine($"2es player: {move2.startX} {move2.startY} --->  {move2.destX} {move2.destY}");
+
+            Thread.Sleep(5000);*/
+
+
             // Ha ember lép, várunk egy lépést
             if (gameState.CurrentPlayer == 1)
             {

@@ -110,8 +110,6 @@ public class GameState
         }
         else
         {
-            Console.WriteLine($"Lépés: {x} {y} {fromx} {fromy}");
-            Console.WriteLine("Érvénytelen lépés!");
         }
     }
     private void JumpUpdateCells(int x, int y, int fromx, int fromy)

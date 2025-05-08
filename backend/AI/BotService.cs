@@ -29,11 +29,17 @@ public class BotService : IGameAI
             }
         }
         GameState game = new GameState(intBoard, (int)player, (int)size);
-        Minimax minimax = new Minimax(game, (int)diff);
+        Minimax minimax = new Minimax(game, (int)diff, (int)player);
         var move = minimax.MaxMove(game);
         return (move.fromx, move.fromy, move.x, move.y);
     }
-
+    public (int startX, int startY, int destX, int destY) CalculateBotMoveMAGAMNAK(int[,] board, CellState player, BoardSize size, GameDifficulty diff)
+    {
+        GameState game = new GameState(board, (int)player, (int)size);
+        Minimax minimax = new Minimax(game, (int)diff, (int)player);
+        var move = minimax.MaxMove(game);
+        return (move.fromx, move.fromy, move.x, move.y);
+    }
 
     // Bot lépés generálása
     public (int x, int y, int fromx, int fromy) GenerateBotMove()
