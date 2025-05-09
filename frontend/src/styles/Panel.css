@@ -65,19 +65,52 @@ h2 {
 	transform: translate(2px, 2px);
 }
 
-@media (max-width: 767px) {
+/*---------------------------
+			@media
+----------------------------*/
+/*Phones portrait*/
+@media (max-width: 599px) and (orientation: portrait) {
 	.panel-container {
 		width: 70%;
 	}
+
 	.dropdown-container {
 		flex-direction: column;
 	}
 }
 
-@media (min-width: 768px) {
+/*Tablets & desktop portrait*/
+@media (min-width: 600px) and (orientation: portrait) {
 	.panel-container {
 		width: 30rem;
 	}
+
+	.dropdown-container {
+		flex-direction: row;
+		gap: 2rem;
+		width: 90%;
+	}
+}
+
+/*Phones landscape*/
+@media (max-width: 699px) and (orientation: landscape) {
+	.panel-container {
+		width: 30rem;
+	}
+
+	.dropdown-container {
+		flex-direction: row;
+		gap: 2rem;
+		width: 90%;
+	}
+}
+
+/*Tablets & desktop landscape*/
+@media (min-width: 700px) and (orientation: landscape) {
+	.panel-container {
+		width: 30rem;
+	}
+
 	.dropdown-container {
 		flex-direction: row;
 		gap: 2rem;
