@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import Cell from "./Cell";
+import { GameState } from "../types";
 import { CellPosition } from "../types";
 import { CellState } from "../constants";
 import useSocket from "../common/hooks/useSocket";
@@ -8,9 +9,10 @@ import useSocket from "../common/hooks/useSocket";
 type TableProps = {
 	cells: CellState[][];
 	ownCellState: CellState;
+	gameState: GameState;
 };
 
-const Table: React.FC<TableProps> = ({ cells, ownCellState }) => {
+const Table: React.FC<TableProps> = ({ cells, ownCellState, gameState }) => {
 	const [startPosition, setStartPosition] = useState<CellPosition | null>(
 		null
 	);
@@ -19,10 +21,10 @@ const Table: React.FC<TableProps> = ({ cells, ownCellState }) => {
 	const { attemptMove } = useSocket();
 
 	const handleCellClick = (state: CellState, coordinate: CellPosition) => {
-		if (state === ownCellState) {
+		if (state === ownCellState && gameState === `Player${state}Turn`) {
 			console.log("startPosition", coordinate);
 			setStartPosition(coordinate);
-		} else if (state === CellState.Empty) {
+		} else if (state === CellState.Empty && startPosition !== null) {
 			console.log("destPosition", coordinate);
 			setDestPosition(coordinate);
 		}
@@ -40,21 +42,26 @@ const Table: React.FC<TableProps> = ({ cells, ownCellState }) => {
 	}, [destPosition]);
 
 	return (
-		<div>
-			<h1>Table</h1>
-			{cells.map((cellRow: CellState[], row) => (
-				<div key={row}>
-					{cellRow.map((cellState: CellState, col) => (
-						<Cell
-							key={col}
-							state={cellState}
-							onClick={() =>
-								handleCellClick(cellState, { row, col })
-							}
-						/>
-					))}
-				</div>
-			))}
+		<div
+			className="table"
+			style={{
+				gridTemplateColumns: `repeat(${cells[0].length}, 1fr)`,
+				gridTemplateRows: `repeat(${cells.length}, 1fr)`,
+			}}
+		>
+			{cells.map((cellRow, row) =>
+				cellRow.map((cellState, col) => (
+					<Cell
+						key={`${row}-${col}`}
+						state={cellState}
+						onClick={() => handleCellClick(cellState, { row, col })}
+						selected={
+							startPosition?.row === row &&
+							startPosition?.col === col
+						}
+					/>
+				))
+			)}
 		</div>
 	);
 };

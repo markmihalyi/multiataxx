@@ -1,0 +1,293 @@
+.game-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2rem;
+	width: 100%;
+	height: 100%;
+}
+
+#in-game-copier {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+/*---------------------------
+		Time & Name
+----------------------------*/
+.user-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 0.313rem;
+	overflow: hidden;
+	font-size: 1.2rem;
+	font-weight: bold;
+}
+#blue {
+	border: 2px solid dodgerblue;
+}
+#green {
+	border: 2px solid lawngreen;
+}
+
+.user-name {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+}
+#user1-name-p {
+	margin: 0;
+}
+#user2-name-p {
+	margin: 0;
+	color: black;
+}
+
+.user-time {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+	background-color: azure;
+}
+.user-time > p {
+	margin: 0;
+	color: darkslategrey;
+}
+
+/*---------------------------
+			Table
+----------------------------*/
+.table {
+	display: grid;
+	gap: 0.5rem;
+}
+
+/*---------------------------
+			Cell
+----------------------------*/
+.cell {
+	aspect-ratio: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-width: 1rem;
+	width: 90%;
+	border-radius: 0.313rem;
+	border: 3px solid rgb(170, 170, 170);
+	overflow: hidden;
+	cursor: default;
+}
+.cell.selected {
+	border: 3px solid black;
+}
+
+.Wall {
+	background-color: grey;
+}
+
+.Player1 {
+	background-color: dodgerblue;
+}
+
+.Player2 {
+	background-color: lawngreen;
+}
+
+.Empty {
+	background-color: lightgrey;
+}
+
+/*---------------------------
+			@media
+----------------------------*/
+/*Phones portrait*/
+@media (max-width: 599px) and (orientation: portrait) {
+	#in-game-copier {
+		bottom: 0.5rem;
+	}
+
+	.game-container {
+		flex-direction: column;
+	}
+
+	.table {
+		width: 70%;
+		max-width: 20rem;
+		aspect-ratio: 1;
+	}
+
+	.user-container {
+		width: 18rem;
+		height: 3rem;
+	}
+
+	.user-name {
+		flex: 15;
+	}
+
+	.user-time {
+		flex: 5;
+	}
+}
+
+/*Tablets portrait*/
+@media (min-width: 600px) and (max-width: 1023px) and (orientation: portrait) {
+	#in-game-copier {
+		bottom: 0.5rem;
+	}
+
+	.game-container {
+		flex-direction: column;
+	}
+
+	.table {
+		width: 60%;
+		gap: 0.7rem;
+		aspect-ratio: 1;
+	}
+
+	.user-container {
+		width: 18rem;
+		height: 3rem;
+	}
+
+	.user-name {
+		flex: 15;
+	}
+
+	.user-time {
+		flex: 5;
+	}
+}
+
+/*Desktop portrait*/
+@media (min-width: 1024px) and (orientation: portrait) {
+	#in-game-copier {
+		bottom: 0.5rem;
+	}
+
+	.game-container {
+		flex-direction: column;
+	}
+
+	.table {
+		width: 60%;
+		gap: 0.7rem;
+		aspect-ratio: 1;
+	}
+
+	.user-container {
+		width: 18rem;
+		height: 3rem;
+	}
+
+	.user-name {
+		flex: 15;
+	}
+
+	.user-time {
+		flex: 5;
+	}
+}
+
+/*Phones landscape*/
+@media (max-width: 949px) and (orientation: landscape) {
+	#in-game-copier {
+		top: 0.8rem;
+	}
+
+	.game-container {
+		flex-direction: row;
+		gap: 1rem;
+	}
+
+	.table {
+		height: 80%;
+		max-height: 20rem;
+		aspect-ratio: 1;
+	}
+
+	.user-container {
+		flex-direction: column;
+		width: 11rem;
+		height: 5rem;
+	}
+
+	.user-name {
+		flex: 1;
+	}
+
+	.user-time {
+		flex: 1;
+	}
+
+	.cell {
+		border: 2px solid rgb(170, 170, 170);
+	}
+	.cell.selected {
+		border: 2px solid black;
+	}
+}
+
+/*Tablets landscape*/
+@media (min-width: 950px) and (max-width: 1919px) and (orientation: landscape) {
+	#in-game-copier {
+		bottom: 0.5rem;
+	}
+
+	.game-container {
+		flex-direction: row;
+	}
+
+	.table {
+		min-width: 25rem;
+		max-height: 80%;
+		aspect-ratio: 1;
+	}
+
+	.user-container {
+		flex-direction: column;
+		width: 12rem;
+		height: 5rem;
+	}
+
+	.user-name {
+		flex: 1;
+	}
+
+	.user-time {
+		flex: 1;
+	}
+}
+
+/*Desktop landscape*/
+@media (min-width: 1920px) and (orientation: landscape) {
+	#in-game-copier {
+		bottom: 0.5rem;
+	}
+
+	.table {
+		width: 50%;
+		max-width: 35rem;
+	}
+
+	.user-container {
+		flex-direction: column;
+		width: 12rem;
+		height: 5rem;
+	}
+
+	.user-name {
+		flex: 1;
+	}
+
+	.user-time {
+		flex: 1;
+	}
+}

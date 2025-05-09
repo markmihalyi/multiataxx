@@ -1,4 +1,4 @@
-export const enum CellState {
+export enum CellState {
 	Empty = 0,
 	Player1 = 1,
 	Player2 = 2,

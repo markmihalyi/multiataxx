@@ -10,7 +10,7 @@ type CopyProps = {
 
 export default function GameCodeCopier({ gameCode }: CopyProps) {
 	const [copied, setCopied] = useState(false);
-	console.log("GameCodeDisplay rendered");
+	//console.log("GameCodeDisplay rendered");
 
 	const handleCopy = async () => {
 		try {
@@ -39,6 +39,11 @@ export default function GameCodeCopier({ gameCode }: CopyProps) {
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ duration: 0.1 }}
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
 						>
 							<FaCheck />
 						</motion.div>
@@ -49,6 +54,11 @@ export default function GameCodeCopier({ gameCode }: CopyProps) {
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ duration: 0.1 }}
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
 						>
 							<TbCopy />
 						</motion.div>

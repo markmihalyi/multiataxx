@@ -1,4 +1,5 @@
 import "../styles/Error&Ready.css";
+import GameCodeCopier from "../components/GameCodeCopier";
 
 import {
 	GameResult,
@@ -17,6 +18,14 @@ import ThreeDotLoading from "../components/ThreeDotLoading";
 import useAuth from "../common/hooks/useAuth";
 import { useSearchParams } from "react-router";
 import useSocket from "../common/hooks/useSocket";
+
+function secondsToTime(seconds: number): string {
+	const minutes = Math.floor(seconds / 60);
+	const remainingSeconds = seconds % 60;
+	const mm = String(minutes).padStart(2, "0");
+	const ss = String(remainingSeconds).padStart(2, "0");
+	return `${mm}:${ss}`;
+}
 
 function Game() {
 	const { socket, connect, joinGame, sendPlayerIsReady } = useSocket();
@@ -153,37 +162,57 @@ function Game() {
 						gameCode={searchParams.get("code") ?? ""}
 					/>
 				) : (
-					cells != null && (
+					cells !== null &&
+					gameState !== null && (
 						<>
-							<div>
-								<p style={{ color: "black" }}>
-									{ownPlayerId === 0
-										? username
-										: otherPlayerName}
-								</p>
-								<p style={{ color: "black" }}>
-									P1 time:{" "}
-									{timeRemaining !== null
-										? timeRemaining[0]
-										: "-"}
-								</p>
+							<div className="game-container">
+								<div className="user-container" id="blue">
+									<div className="user-name Player1">
+										<p id="user1-name-p">
+											{"0123456789as"}
+											{ownPlayerId === 0
+												? username
+												: otherPlayerName}
+										</p>
+									</div>
+									<div className="user-time">
+										<p id="user1-time-p">
+											{timeRemaining !== null
+												? secondsToTime(
+														timeRemaining[0]
+												  )
+												: "-"}
+										</p>
+									</div>
+								</div>
+								<Table
+									cells={cells}
+									ownCellState={ownPlayerId + 1}
+									gameState={gameState}
+								/>
+								<div className="user-container" id="green">
+									<div className="user-name Player2">
+										<p id="user2-name-p">
+											{ownPlayerId === 1
+												? username
+												: otherPlayerName}
+										</p>
+									</div>
+									<div className="user-time">
+										<p id="user2-time-p">
+											{timeRemaining !== null
+												? secondsToTime(
+														timeRemaining[1]
+												  )
+												: "-"}
+										</p>
+									</div>
+								</div>
 							</div>
-							<Table
-								cells={cells}
-								ownCellState={ownPlayerId + 1}
-							/>
-							<div>
-								<p style={{ color: "black" }}>
-									{ownPlayerId === 1
-										? username
-										: otherPlayerName}
-								</p>
-								<p style={{ color: "black" }}>
-									P2 time:{" "}
-									{timeRemaining !== null
-										? timeRemaining[1]
-										: "-"}
-								</p>
+							<div id="in-game-copier">
+								<GameCodeCopier
+									gameCode={searchParams.get("code") ?? ""}
+								/>
 							</div>
 						</>
 					)

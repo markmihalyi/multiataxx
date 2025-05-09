@@ -66,6 +66,9 @@ h2 {
 }
 
 @media (max-width: 767px) {
+	.panel-container {
+		width: 70%;
+	}
 	.dropdown-container {
 		flex-direction: column;
 	}
