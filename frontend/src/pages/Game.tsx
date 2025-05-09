@@ -166,10 +166,16 @@ function Game() {
 					gameState !== null && (
 						<>
 							<div className="game-container">
-								<div className="user-container" id="blue">
+								<div
+									className="user-container"
+									id={
+										gameState === "Player1Turn"
+											? "blue"
+											: "neutral"
+									}
+								>
 									<div className="user-name Player1">
 										<p id="user1-name-p">
-											{"0123456789as"}
 											{ownPlayerId === 0
 												? username
 												: otherPlayerName}
@@ -190,7 +196,14 @@ function Game() {
 									ownCellState={ownPlayerId + 1}
 									gameState={gameState}
 								/>
-								<div className="user-container" id="green">
+								<div
+									className="user-container"
+									id={
+										gameState === "Player2Turn"
+											? "green"
+											: "neutral"
+									}
+								>
 									<div className="user-name Player2">
 										<p id="user2-name-p">
 											{ownPlayerId === 1

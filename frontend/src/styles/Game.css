@@ -31,6 +31,10 @@
 #green {
 	border: 2px solid lawngreen;
 }
+#neutral {
+	border: 2px solid #ececec;
+	opacity: 0.5;
+}
 
 .user-name {
 	display: flex;
