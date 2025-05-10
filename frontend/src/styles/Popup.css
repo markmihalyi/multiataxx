@@ -212,11 +212,14 @@
 }
 
 .win-p {
+	margin-top: 0.5rem;
 	color: green;
 }
 .loose-p {
+	margin-top: 0.5rem;
 	color: rgb(215, 0, 0);
 }
 .draw-p {
+	margin-top: 0.5rem;
 	color: darkblue;
 }

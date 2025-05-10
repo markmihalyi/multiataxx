@@ -4,6 +4,12 @@
 	height: calc(100% - 4rem);
 }
 
+@media (max-width: 767px) {
+	.container {
+		justify-content: space-evenly;
+	}
+}
+
 @media (min-width: 768px) {
 	.container {
 		justify-content: center;
@@ -11,8 +17,9 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-height: 599px) {
 	.container {
-		justify-content: space-evenly;
+		height: max-content;
+		padding: 1rem;
 	}
 }

@@ -6,6 +6,7 @@ import Navbar from "../layouts/Navbar";
 import api from "../api";
 import { handleAxiosError } from "../api";
 import { useState } from "react";
+import { ApiResponse } from "../types";
 
 function Register() {
 	const [username, setUsername] = useState("");
@@ -67,7 +68,7 @@ function Register() {
 								onChange={(e) =>
 									setUsername(e.currentTarget.value)
 								}
-								placeholder="Username (3-20 characters)"
+								placeholder="Username (3-15 characters)"
 								autoComplete="username"
 								required
 							/>
