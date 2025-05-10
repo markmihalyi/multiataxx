@@ -11,7 +11,7 @@ export default function Error() {
 
 	return (
 		<div className="nav-container">
-			<div className="upper-section" id="red">
+			<div className="upper-section" id="red-background">
 				<VscError className="error-icon" />
 				<p className="error-title">Error</p>
 			</div>

@@ -11,7 +11,7 @@ type ReadyProps = {
 export default function Ready({ buttonHandle, isReady, gameCode }: ReadyProps) {
 	return (
 		<div className="nav-container" id="wide">
-			<div className="upper-section" id="green">
+			<div className="upper-section" id="green-background">
 				<h2 className="ready-title">
 					Copy the game code and share it with your opponent:
 				</h2>

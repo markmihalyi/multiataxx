@@ -25,13 +25,13 @@
 	font-size: 1.2rem;
 	font-weight: bold;
 }
-#blue {
+#blue-border {
 	border: 2px solid dodgerblue;
 }
-#green {
+#green-border {
 	border: 2px solid lawngreen;
 }
-#neutral {
+#neutral-border {
 	border: 2px solid #ececec;
 	opacity: 0.5;
 }

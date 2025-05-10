@@ -131,7 +131,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, setIsOpen }) => {
 					<div className="logo">
 						<FaUser className="user-icon" />
 					</div>
-					<h2>Hi there!</h2>
+					<h2 className="login-popup-h2">Hi there!</h2>
 					<form onSubmit={handleLogin} className="login-form">
 						<input
 							className={`${inputError ? "inputError" : ""}`}

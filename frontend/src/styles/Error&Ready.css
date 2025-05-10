@@ -37,7 +37,7 @@
 /*---------------------------
 			Ready
 ----------------------------*/
-#green {
+#green-background {
 	background-color: rgb(0, 177, 0);
 }
 
@@ -69,7 +69,7 @@
 /*---------------------------
 			Error
 ----------------------------*/
-#red {
+#red-background {
 	background-color: red;
 }
 

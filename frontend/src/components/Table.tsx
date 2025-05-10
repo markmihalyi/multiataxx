@@ -22,10 +22,10 @@ const Table: React.FC<TableProps> = ({ cells, ownCellState, gameState }) => {
 
 	const handleCellClick = (state: CellState, coordinate: CellPosition) => {
 		if (state === ownCellState && gameState === `Player${state}Turn`) {
-			console.log("startPosition", coordinate);
+			//console.log("startPosition", coordinate);
 			setStartPosition(coordinate);
 		} else if (state === CellState.Empty && startPosition !== null) {
-			console.log("destPosition", coordinate);
+			//console.log("destPosition", coordinate);
 			setDestPosition(coordinate);
 		}
 	};
