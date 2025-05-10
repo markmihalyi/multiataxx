@@ -131,7 +131,7 @@
 	font-size: 2.5rem;
 }
 
-.login-popup > h2 {
+.login-popup-h2 {
 	color: var(--popup-color);
 	font: inherit;
 	font-size: 1.7rem;
@@ -196,4 +196,27 @@
 }
 .loginButton:hover {
 	background: var(--popup-hover-color);
+}
+
+/*---------------------------
+		Win-loose-draw
+----------------------------*/
+.win-h2 {
+	color: green;
+}
+.loose-h2 {
+	color: rgb(215, 0, 0);
+}
+.draw-h2 {
+	color: darkblue;
+}
+
+.win-p {
+	color: green;
+}
+.loose-p {
+	color: rgb(215, 0, 0);
+}
+.draw-p {
+	color: darkblue;
 }

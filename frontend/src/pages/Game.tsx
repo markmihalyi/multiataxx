@@ -1,5 +1,6 @@
 import "../styles/Error&Ready.css";
 import GameCodeCopier from "../components/GameCodeCopier";
+import GameOverPopup from "../components/GameOverPopup";
 
 import {
 	GameResult,
@@ -16,7 +17,7 @@ import Ready from "../components/Ready";
 import Table from "../components/Table";
 import ThreeDotLoading from "../components/ThreeDotLoading";
 import useAuth from "../common/hooks/useAuth";
-import { useSearchParams } from "react-router";
+import { useSearchParams, useNavigate } from "react-router";
 import useSocket from "../common/hooks/useSocket";
 
 function secondsToTime(seconds: number): string {
@@ -31,6 +32,7 @@ function Game() {
 	const { socket, connect, joinGame, sendPlayerIsReady } = useSocket();
 	const { username } = useAuth();
 	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
 
 	const [connected, setConnected] = useState(false);
 	const [subscribed, setSubscribed] = useState(false);
@@ -170,8 +172,8 @@ function Game() {
 									className="user-container"
 									id={
 										gameState === "Player1Turn"
-											? "blue"
-											: "neutral"
+											? "blue-border"
+											: "neutral-border"
 									}
 								>
 									<div className="user-name Player1">
@@ -200,8 +202,8 @@ function Game() {
 									className="user-container"
 									id={
 										gameState === "Player2Turn"
-											? "green"
-											: "neutral"
+											? "green-border"
+											: "neutral-border"
 									}
 								>
 									<div className="user-name Player2">
@@ -231,6 +233,18 @@ function Game() {
 					)
 				)}
 			</div>
+
+			{gameResult && (
+				<GameOverPopup
+					isVisible={gameResult !== null}
+					gameResult={gameResult}
+					ownPlayerId={ownPlayerId}
+					onClose={() => {
+						setGameResult(null);
+						navigate(-1);
+					}}
+				/>
+			)}
 		</>
 	);
 }
