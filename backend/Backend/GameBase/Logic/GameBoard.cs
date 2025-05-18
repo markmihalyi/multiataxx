@@ -26,13 +26,13 @@ namespace Backend.GameBase.Logic
             switch (Size)
             {
                 case (int)BoardSize.Small:
-                    Cells = PredefinedMaps.SmallMap;
+                    Cells = (CellState[,])PredefinedMaps.SmallMap.Clone();
                     break;
                 case (int)BoardSize.Medium:
-                    Cells = PredefinedMaps.MediumMap;
+                    Cells = (CellState[,])PredefinedMaps.MediumMap.Clone();
                     break;
                 case (int)BoardSize.Large:
-                    Cells = PredefinedMaps.LargeMap;
+                    Cells = (CellState[,])PredefinedMaps.LargeMap.Clone();
                     break;
                 default:
                     break;
