@@ -1,18 +1,12 @@
-﻿using Backend.GameLogic.Entities;
+﻿using AI.Abstractions;
 
-namespace Backend.GameLogic.Logic
+namespace Backend.GameBase.Logic
 {
     public record Point(int X, int Y)
     {
         public int DistanceTo(Point other)
         {
-            int dx = Math.Abs(other.X - X);
-            int dy = Math.Abs(other.Y - Y);
-
-            if (dx + dy > 2)
-                return dx + dy;
-
-            return Math.Max(dx, dy);
+            return Math.Max(Math.Abs(other.X - X), Math.Abs(other.Y - Y));
         }
     }
 
@@ -29,25 +23,25 @@ namespace Backend.GameLogic.Logic
         {
             MoveType moveType = MoveType.INVALID;
 
-            // Kiinduló és cél mezők ellenőrzése, hogy a játéktábla tartományán belül vannak-e
+            // Check starting and destination cells are within the range of the game board
             if (!IsWithinBounds(start, cells) || !IsWithinBounds(destination, cells))
             {
                 return moveType;
             }
 
-            // Kiinduló mező állapotának ellenőrzése
+            // Check the state of the initial cell
             if (cells[start.X, start.Y] != ownCellState)
             {
                 return moveType;
             }
 
-            // Cél mező állapotának ellenőrzése
+            // Check the state of the target cell
             if (cells[destination.X, destination.Y] != CellState.Empty)
             {
                 return moveType;
             }
 
-            // Mozgás típusának ellenőrzése
+            // Check the type of movement
             if (start.DistanceTo(destination) == 1)
             {
                 moveType = MoveType.SIMPLE_MOVE;

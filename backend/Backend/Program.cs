@@ -1,23 +1,29 @@
-﻿using Backend;
+﻿using AI.Abstractions;
+using Backend;
 using Backend.Data;
+using Backend.GameBase.Serialization;
+using Backend.Hubs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 {
+    Stripe.StripeConfiguration.ApiKey = "sk_test_51RMFsCQY4iF3m01oozdg5tlsNe9bYSL73JKYdCEWRyeHpPv7HdSYM0tjJcrq2FMeruL3nUYYAivccvP39tcUUf5900XzgHbnfE";
+
     // Fejlesztői környezettől függően appsettings.json kialakítása 
-    if (!Debugger.IsAttached)
+    if (Debugger.IsAttached)
     {
-        builder.Configuration.AddJsonFile(
-            $"Backend/appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
-            optional: false,
-            reloadOnChange: true
-         ).AddEnvironmentVariables();
+        builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true).AddEnvironmentVariables();
+    }
+    else
+    {
+        builder.Configuration.AddJsonFile("appsettings.Production.json", optional: false, reloadOnChange: true).AddEnvironmentVariables();
     }
 
     // Adatbázis beállítása
@@ -74,9 +80,39 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Services
     builder.Services.AddScoped<AuthService>();
+    builder.Services.AddSingleton<ScopedExecutor>();
+    builder.Services.AddSingleton<GameService>();
+
+    // Load AI class with loose coupling
+    var aiDllPath = Path.Combine(AppContext.BaseDirectory, "AI.dll");
+    if (File.Exists(aiDllPath))
+    {
+        // -> 1. Load AI DLL
+        var aiAssembly = Assembly.LoadFrom(aiDllPath);
+
+        try
+        {
+            // -> 2. Find the IGameAI implementation
+            var aiType = aiAssembly.GetTypes().FirstOrDefault(t => t.GetInterfaces().Contains(typeof(IGameAI)));
+            if (aiType != null)
+            {
+                // -> 3. Register to DI container
+                builder.Services.AddSingleton(typeof(IGameAI), aiType);
+            }
+        }
+        catch (Exception)
+        {
+            throw new Exception("The AI.dll does not contain an IGameAI implementation.");
+        }
+    }
 
     // Controllers
     builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new CellStateArrayConverter());
+            options.JsonSerializerOptions.Converters.Add(new CellStateArrayListConverter());
+        })
         .ConfigureApiBehaviorOptions(options =>
         {
             options.SuppressMapClientErrors = true;
@@ -91,6 +127,13 @@ var builder = WebApplication.CreateBuilder(args);
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
     });
+
+    // SignalR
+    builder.Services.AddSignalR()
+        .AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.Converters.Add(new CellStateArrayConverter());
+        });
 }
 
 var app = builder.Build();
@@ -102,11 +145,14 @@ var app = builder.Build();
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "MultiAtaxx");
     });
 
+    app.UseCors("AllowSpecificOrigins");
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseCors("AllowSpecificOrigins");
 
     app.MapControllers();
+
+    // SignalR route
+    app.MapHub<GameHub>("/game");
 }
 
 app.Run();

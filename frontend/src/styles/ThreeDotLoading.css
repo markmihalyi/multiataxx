@@ -1,0 +1,37 @@
+.dot-loader {
+	display: flex;
+	gap: 0.625rem;
+	justify-content: center;
+	align-items: center;
+	height: 2.7rem;
+}
+
+.dot {
+	width: 0.75rem;
+	height: 0.75rem;
+	border-radius: 50%;
+	background-color: black;
+	animation: pulse 1.5s infinite;
+}
+
+.dot:nth-child(1) {
+	animation-delay: 0s;
+}
+.dot:nth-child(2) {
+	animation-delay: 0.2s;
+}
+.dot:nth-child(3) {
+	animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		background-color: black;
+		transform: scale(1);
+	}
+	50% {
+		background-color: grey;
+		transform: scale(1.4);
+	}
+}

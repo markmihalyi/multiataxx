@@ -52,8 +52,8 @@
 	right: 0.8rem;
 	top: 3.6rem;
 	box-sizing: border-box;
-	width: 12rem;
-	height: 7rem;
+	width: 15rem;
+	height: 10rem;
 	border-radius: 0.5rem;
 	background-color: var(--popup-background-color);
 	box-shadow: -2px 2px 7px 3px rgba(0, 0, 0, 0.1);
@@ -62,19 +62,31 @@
 	padding-bottom: 1rem;
 }
 
-.logout-popup-inner {
+.logout-popup-circle {
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
 	position: relative;
-	bottom: 30px;
+	bottom: 1.4rem;
 	width: 3rem;
 	height: 3rem;
 	border-radius: 50%;
 	color: white;
 	font-size: 1.5rem;
 	background-color: var(--navbar-green);
+}
+
+.logout-popup > p {
+	margin: 0;
+	color: black;
+	position: relative;
+	bottom: 0.4rem;
+}
+
+#p-bottom {
+	margin-top: 0.1rem;
+	margin-bottom: 0.6rem;
 }
 
 .login-popup > a {
@@ -119,7 +131,7 @@
 	font-size: 2.5rem;
 }
 
-.login-popup > h2 {
+.login-popup-h2 {
 	color: var(--popup-color);
 	font: inherit;
 	font-size: 1.7rem;
@@ -146,6 +158,12 @@
 	font-size: 0.9rem;
 }
 
+.login-form > input.inputError {
+	color: red;
+	border: 1px solid red;
+	animation: shake 0.3s;
+}
+
 .login-form > p {
 	color: gray;
 	font-size: 0.8rem;
@@ -154,10 +172,8 @@
 
 #errorMessage {
 	color: red;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 	font-weight: bold;
-	opacity: 1;
-	transition: opacity 0.5s ease-in-out;
 }
 
 .login-form > p > a {
@@ -180,4 +196,30 @@
 }
 .loginButton:hover {
 	background: var(--popup-hover-color);
+}
+
+/*---------------------------
+		Win-loose-draw
+----------------------------*/
+.win-h2 {
+	color: green;
+}
+.loose-h2 {
+	color: rgb(215, 0, 0);
+}
+.draw-h2 {
+	color: darkblue;
+}
+
+.win-p {
+	margin-top: 0.5rem;
+	color: green;
+}
+.loose-p {
+	margin-top: 0.5rem;
+	color: rgb(215, 0, 0);
+}
+.draw-p {
+	margin-top: 0.5rem;
+	color: darkblue;
 }

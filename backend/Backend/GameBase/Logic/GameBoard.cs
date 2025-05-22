@@ -1,63 +1,56 @@
-﻿using Backend.GameLogic.Entities;
-using Backend.GameLogic.Serialization;
+﻿using AI.Abstractions;
+using Backend.GameBase.Entities;
+using Backend.GameBase.MapTemplates;
+using Backend.GameBase.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Backend.GameLogic.Logic
+namespace Backend.GameBase.Logic
 {
     public class GameBoard
     {
         [JsonConverter(typeof(CellStateArrayConverter))]
-        public CellState[,] Cells { get; }
+        public CellState[,] Cells { get; private set; } = new CellState[0, 0];
+        public List<CellState[,]> Steps { get; } = [];
 
         public int Size { get; }
 
         public GameBoard(BoardSize size)
         {
             Size = (int)size;
-            Cells = new CellState[Size, Size];
             InitializeBoard();
-        }
-
-        private bool IsStartingPosition(int i, int j)
-        {
-            return (i == 0 && j == 0) || (i == Size - 1 && j == Size - 1);
-        }
-
-        private CellState GetStartingPlayer(int i, int j)
-        {
-            return (i == 0 && j == 0) ? CellState.Player1 : CellState.Player2;
+            Steps.Add((CellState[,])Cells.Clone());
         }
 
         private void InitializeBoard()
         {
-            for (int i = 0; i < Size; i++)
+            switch (Size)
             {
-                for (int j = 0; j < Size; j++)
-                {
-                    if (IsStartingPosition(i, j))
-                    {
-                        Cells[i, j] = GetStartingPlayer(i, j);
-                    }
-                    else
-                    {
-                        Cells[i, j] = CellState.Empty;
-                    }
-                }
+                case (int)BoardSize.Small:
+                    Cells = (CellState[,])PredefinedMaps.SmallMap.Clone();
+                    break;
+                case (int)BoardSize.Medium:
+                    Cells = (CellState[,])PredefinedMaps.MediumMap.Clone();
+                    break;
+                case (int)BoardSize.Large:
+                    Cells = (CellState[,])PredefinedMaps.LargeMap.Clone();
+                    break;
+                default:
+                    break;
             }
         }
 
         public void PerformMove(Point start, Point destination, MoveType moveType, CellState ownCellState)
         {
-            // Ugrás esetén a kiinduló mező legyen szabad
+            // When jumping, the initial cell should be free
             if (moveType == MoveType.JUMP)
             {
                 Cells[start.X, start.Y] = CellState.Empty;
             }
 
-            // Cél mező elfoglalása
+            // Capture target cell
             Cells[destination.X, destination.Y] = ownCellState;
 
-            // Cél mezővel szomszédos ellenséges területek elfoglalása (ha van)
+            // Capture enemy cells next to the target cell (if any)
             CellState enemyCellState = ownCellState == CellState.Player1 ? CellState.Player2 : CellState.Player1;
 
             int firstCheckedRow = destination.X - 1;
@@ -75,12 +68,13 @@ namespace Backend.GameLogic.Logic
                     }
                 }
             }
+
+            Steps.Add((CellState[,])Cells.Clone());
         }
 
         public (bool, GameResult?) CheckIfGameIsOver()
         {
-            int playerOneCellCount = 0;
-            int playerTwoCellCount = 0;
+            // Checking whether players can still move
             bool playerOneCanMove = false;
             bool playerTwoCanMove = false;
 
@@ -92,16 +86,14 @@ namespace Backend.GameLogic.Logic
 
                     if (cellState == CellState.Player1)
                     {
-                        playerOneCellCount++;
                         playerOneCanMove = playerOneCanMove || CanMove(i, j);
                     }
                     else if (cellState == CellState.Player2)
                     {
-                        playerTwoCellCount++;
                         playerTwoCanMove = playerTwoCanMove || CanMove(i, j);
                     }
 
-                    // Ha mindkét játékos tud lépni, akkor nincs értelme további ellenőrzésnek
+                    // If both players can make a move, there is no need for further checks
                     if (playerOneCanMove && playerTwoCanMove)
                     {
                         return (false, null);
@@ -109,25 +101,64 @@ namespace Backend.GameLogic.Logic
                 }
             }
 
-            // Játék vége állapotok ellenőrzése
-            if (!playerTwoCanMove && playerOneCellCount > playerTwoCellCount)
+            // If one player can no longer move, the empty cells will belong to the other player
+            if (playerOneCanMove && !playerTwoCanMove)
+            {
+                FillEmptyCells(CellState.Player1);
+            }
+            else if (!playerOneCanMove && playerTwoCanMove)
+            {
+                FillEmptyCells(CellState.Player2);
+            }
+
+            // Counts the number of cells captured by players
+            int playerOneCellCount = 0;
+            int playerTwoCellCount = 0;
+
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    var cellState = Cells[i, j];
+
+                    if (cellState == CellState.Player1)
+                    {
+                        playerOneCellCount++;
+                    }
+                    else if (cellState == CellState.Player2)
+                    {
+                        playerTwoCellCount++;
+                    }
+                }
+            }
+
+            // Calculate game result based on the number of cells captured
+            if (playerOneCellCount > playerTwoCellCount)
             {
                 return (true, GameResult.Player1Won);
             }
 
-            if (!playerOneCanMove && playerOneCellCount < playerTwoCellCount)
+            if (playerOneCellCount < playerTwoCellCount)
             {
                 return (true, GameResult.Player2Won);
             }
 
-            if (!playerOneCanMove && !playerTwoCanMove && playerOneCellCount == playerTwoCellCount)
-            {
-                return (true, GameResult.Draw);
-            }
-
-            return (false, null);
+            return (true, GameResult.Draw);
         }
 
+        public void FillEmptyCells(CellState cellState)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    if (Cells[i, j] == CellState.Empty)
+                    {
+                        Cells[i, j] = cellState;
+                    }
+                }
+            }
+        }
 
         private bool IsValidCell(int x, int y) => x >= 0 && x < Size && y >= 0 && y < Size;
 

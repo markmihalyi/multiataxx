@@ -1,0 +1,121 @@
+.nav-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border-radius: 0.75rem;
+	overflow: hidden;
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.upper-section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1.2rem;
+	width: 100%;
+	padding: 1.2rem;
+}
+
+.lower-section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1.7rem;
+	width: 100%;
+	padding: 1.7rem;
+	background-color: white;
+}
+
+.lower-section > p {
+	color: darkslategrey;
+	font-size: 1rem;
+	margin: 0;
+}
+
+/*---------------------------
+			Ready
+----------------------------*/
+#green-background {
+	background-color: rgb(0, 177, 0);
+}
+
+.ready-title {
+	font-size: 1.2rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.ready-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 8.5rem;
+	height: 2.7rem;
+	border: 2px solid #725000;
+	border-radius: 0.375rem;
+	font-size: 1.1rem;
+	font-weight: bold;
+	color: white;
+	background: linear-gradient(#efca38, #ba7a0c);
+}
+.ready-button:hover {
+	background: linear-gradient(#ad901b, #986d17);
+	box-shadow: 2px 2px 0px #7a5e00;
+	transform: translate(2px, 2px);
+}
+
+/*---------------------------
+			Error
+----------------------------*/
+#red-background {
+	background-color: red;
+}
+
+.error-icon {
+	font-size: 4rem;
+	color: white;
+}
+
+.error-title {
+	color: white;
+	font-size: 1.6rem;
+	margin: auto;
+}
+
+.error-text {
+	color: darkslategrey;
+	font-size: 1rem;
+	margin: 0;
+}
+
+.error-button {
+	font-size: 1rem;
+	font-weight: bold;
+	padding: 0.9rem 2rem;
+	border: none;
+	border-radius: 1.5rem;
+	background-color: rgb(237, 0, 0);
+	color: white;
+	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+	transition: background 0.2s;
+}
+.error-button:hover {
+	background-color: rgb(209, 0, 0);
+}
+
+@media (max-width: 767px) {
+	.nav-container {
+		width: 18.75rem;
+	}
+}
+
+@media (min-width: 768px) {
+	.nav-container {
+		width: 25rem;
+	}
+	#wide {
+		width: 30rem;
+	}
+}

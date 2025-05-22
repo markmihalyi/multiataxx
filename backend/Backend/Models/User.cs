@@ -7,10 +7,8 @@ namespace Backend.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
         public string Username { get; set; } = string.Empty;
 
-        [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
         public string? RefreshToken { get; set; }
@@ -18,5 +16,8 @@ namespace Backend.Models
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
         public int Balance { get; set; }
+
+        // navigation properties
+        public List<OwnedBooster> OwnedBoosters { get; set; } = [];
     }
 }

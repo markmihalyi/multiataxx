@@ -1,25 +1,55 @@
 ﻿using System;
+using System.Drawing;
+using AI.Abstractions;
 
 class Program
 {
     static void Main(string[] args)
     {
         // inicializálás
-        GameState gameState = new GameState();
-        BotService botService = new BotService(gameState);
+        GameState gameState = new GameState(5);
+        BotService botService = new BotService(gameState, AI.Abstractions.GameDifficulty.Easy);
 
+        // első oszlop 2. sor
         // A játék futtatása
         while (true)
         {
             Console.Clear();
-            DisplayBoard(gameState.Board);
+            DisplayBoard(gameState);
+            /*
+            CellState[,] cells = new CellState[(int)BoardSize.Small, (int)BoardSize.Small]
+            {
+                { CellState.Player1, CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Wall,  CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Empty },
+                { CellState.Empty,   CellState.Empty,   CellState.Empty, CellState.Empty,   CellState.Player1 }
+            };
+            BotService botservice1 = new BotService();
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    Console.Write((int)cells[i,j]);
+                }
+                Console.WriteLine();
+            }
+            var move = botservice1.CalculateBotMove(cells, CellState.Player1, BoardSize.Small, GameDifficulty.Hard);
+            var move2 = botservice1.CalculateBotMove(cells, CellState.Player2, BoardSize.Small, GameDifficulty.Hard);
+
+            Console.WriteLine($"1es player: {move.startX} {move.startY} --->  {move.destX} {move.destY}");
+            Console.WriteLine($"2es player: {move2.startX} {move2.startY} --->  {move2.destX} {move2.destY}");
+
+            Thread.Sleep(5000);*/
+
+
             // Ha ember lép, várunk egy lépést
             if (gameState.CurrentPlayer == 1)
             {
-                if (IsGameOver(gameState))
+                if (gameState.IsGameOver())
                 {
                     Console.Clear();
-                    DisplayBoard(gameState.Board);
+                    DisplayBoard(gameState);
                     Console.WriteLine("A játék véget ért!");
                     break;
                 }
@@ -40,12 +70,10 @@ class Program
                         gameState.MakeMove(x, y, fromx, fromy);
                         gameState.SwitchPlayer();
                     }
-
                 }
                 else
                 {
                     Console.WriteLine("Érvénytelen lépés. Próbáld újra.");
-                    Thread.Sleep(2000);
                 }
             }
             else
@@ -54,28 +82,22 @@ class Program
                 botService.MakeBotMove();
                 gameState.SwitchPlayer(); 
             }
-
-            // A játék vége ellenőrzése (egy egyszerű logika a végén)
-
         }
     }
 
     // A tábla kirajzolása
-    static void DisplayBoard(int[,] board)
+    public static void DisplayBoard(GameState gameState)
     {
-        for (int i = 0; i < 8; i++)
+        
+        for (int i = 0; i < GameState.N; i++)
         {
-            for (int j = 0; j < 8; j++)
+            for (int j = 0; j < GameState.N; j++)
             {
-                char symbol = board[i, j] == 0 ? '.' : board[i, j] == 1 ? '1' : '2';
+                char symbol = gameState.Board[i, j] == 0 ? '.' : gameState.Board[i, j] == 1 ? '1' : gameState.Board[i, j] == 2 ? '2' : 'X';
                 Console.Write(symbol + " ");
             }
             Console.WriteLine();
         }
     }
-    // Tábla tele van akkor vége
-    static bool IsGameOver(GameState gameState)
-    {
-        return gameState.GeneratePossibleMoves(1).Count() == 0 || gameState.GeneratePossibleMoves(2).Count()>0;
-    }
+
 }

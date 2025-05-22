@@ -1,8 +1,8 @@
-﻿using Backend.GameLogic.Entities;
+﻿using AI.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Backend.GameLogic.Serialization
+namespace Backend.GameBase.Serialization
 {
     public class CellStateArrayConverter : JsonConverter<CellState[,]>
     {

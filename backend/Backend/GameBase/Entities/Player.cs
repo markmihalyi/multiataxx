@@ -1,10 +1,10 @@
-﻿namespace Backend.GameLogic.Entities
+﻿namespace Backend.GameBase.Entities
 {
-    public class Player(int userId, string connectionId, string name)
+    public class Player(int? userId, string? connectionId, string name)
     {
-        public int UserId { get; } = userId;
+        public int? UserId { get; } = userId;
 
-        public string ConnectionId { get; } = connectionId;
+        public string? ConnectionId { get; } = connectionId;
 
         public string Name { get; } = name;
 

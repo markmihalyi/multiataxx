@@ -1,46 +1,57 @@
 ﻿
+using AI;
 using System.Numerics;
+using AI.Abstractions;
 
-public class BotService
+public class BotService : IGameAI
 {
     private GameState _gameState;
     private Minimax _minimax;
-    public BotService(GameState gameState)
+    public BotService()
+    {
+
+    }
+    public BotService(GameState gameState, AI.Abstractions.GameDifficulty diff)
     {
         _gameState = gameState;
-        _minimax = new Minimax(gameState, 3);
+        _minimax = new Minimax(gameState, (int) diff);
+    }
+
+    public (int startX, int startY, int destX, int destY) CalculateBotMove(CellState[,] board, CellState player, BoardSize size, GameDifficulty diff)
+    {
+        int[,] intBoard = new int[board.GetLength(0), board.GetLength(1)];
+        
+        for (int x = 0; x < board.GetLength(0); x++)
+        {
+            for (int y = 0; y < board.GetLength(1); y++)
+            {
+                intBoard[x, y] = (int)board[x, y];
+            }
+        }
+        GameState game = new GameState(intBoard, (int)player, (int)size);
+        Minimax minimax = new Minimax(game, (int)diff, (int)player);
+        var move = minimax.MaxMove(game);
+        return (move.fromx, move.fromy, move.x, move.y);
     }
 
     // Bot lépés generálása
-    // Jelenleg csak random (egyszerű)
     public (int x, int y, int fromx, int fromy) GenerateBotMove()
     {
-        // TODO: Booster metódus implementálása
-
-        return (0, 0, 0, 0);
+        var move = _minimax.MaxMove(_gameState);
+        return (move.x, move.y, move.fromx, move.fromy);
     }
-
 
     // Bot lépése végrehajtása és kiírása
     public void MakeBotMove()
     {
-        var move = _minimax.MaxMove(_gameState);
+        var move = GenerateBotMove();
         // Generáljuk a bot lépését
         int x = move.x;
         int y = move.y;
         int fromx = move.fromx;
         int fromy = move.fromy;
-        // A bot lépése végrehajtása
-        // Ha a bot nem talált érvényes lépést
-        if (x == -1 && y == -1 && fromx == -1 && fromy == -1)
-        {
-            Console.WriteLine("A bot nem tudott lépni!");
-            return;
-        }
 
         // A bot lépése végrehajtása
-        _gameState.MakeMove(x, y, fromx, fromy);
-        Console.WriteLine($"Bot moved from actually ({fromx}, {fromy}) to ({x}, {y})");
-        Thread.Sleep(2000);
+        _gameState.MakeMove(move.x, move.y, move.fromx, move.fromy);
     }
 }

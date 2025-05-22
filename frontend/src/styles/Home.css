@@ -4,10 +4,10 @@
 	height: calc(100% - 4rem);
 }
 
-.disabled-link {
-	pointer-events: none;
-	opacity: 0.5;
-	cursor: not-allowed;
+@media (max-width: 767px) {
+	.container {
+		justify-content: space-evenly;
+	}
 }
 
 @media (min-width: 768px) {
@@ -17,8 +17,9 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-height: 599px) {
 	.container {
-		justify-content: space-evenly;
+		height: max-content;
+		padding: 1rem;
 	}
 }

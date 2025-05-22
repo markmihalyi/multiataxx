@@ -3,8 +3,7 @@ import AuthContext, { IAuthContext } from "../providers/AuthProvider";
 import { useContext } from "react";
 
 const useAuth = () => {
-	const { isLoggedIn, setIsLoggedIn } = useContext<IAuthContext>(AuthContext);
-	return { isLoggedIn, setIsLoggedIn };
+	return useContext<IAuthContext>(AuthContext);
 };
 
 export default useAuth;

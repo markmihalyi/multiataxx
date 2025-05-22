@@ -1,0 +1,48 @@
+.game-code-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: row;
+	gap: 0;
+	height: 2.2rem;
+	margin-bottom: 0.8rem;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.game-code-input {
+	margin: 0;
+	height: 2.2rem;
+	font-size: 1rem;
+	font-weight: bold;
+	text-align: center;
+	color: darkslategrey;
+	border: none;
+}
+
+.copy-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 2.2rem;
+	width: 2.2rem;
+	background-color: green;
+	color: white;
+}
+
+@media (max-width: 767px) {
+	.game-code-input {
+		width: 8rem;
+	}
+}
+
+@media (min-width: 768px) {
+	.game-code-input {
+		width: 12rem;
+	}
+
+	.copy-button:hover {
+		background-color: darkgreen;
+		transition-duration: 0.2s;
+	}
+}
