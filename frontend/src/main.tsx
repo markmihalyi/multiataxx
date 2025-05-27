@@ -1,15 +1,15 @@
 import { BrowserRouter, Route, Routes } from "react-router";
+import ReactDOM from "react-dom/client";
 
 import { AuthContextProvider } from "./common/providers/AuthProvider";
+import { SocketContextProvider } from "./common/providers/SocketProvider";
 import Game from "./pages/Game";
 import Home from "./pages/Home";
 import MultiHost from "./pages/MultiHost";
 import MultiJoin from "./pages/MultiJoin";
 import MultiLobby from "./pages/MultiLobby";
-import ReactDOM from "react-dom/client";
-import Register from "./pages/Register";
 import SingleLobby from "./pages/SingleLobby";
-import { SocketContextProvider } from "./common/providers/SocketProvider";
+import Register from "./pages/Register";
 
 const root = document.getElementById("root");
 
