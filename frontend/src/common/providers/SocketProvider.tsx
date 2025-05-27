@@ -14,6 +14,7 @@ export interface ISocketContext {
 		startPosition: CellPosition,
 		destPosition: CellPosition
 	) => Promise<void>;
+	tryUseBooster: (id: number) => Promise<void>;
 }
 
 const SocketContext = createContext<ISocketContext>({} as ISocketContext);
@@ -56,6 +57,11 @@ const SocketContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 		);
 	};
 
+	const tryUseBooster = async (id: number) => {
+		if (socket === null) return;
+		await socket.invoke("UseBooster", id);
+	};
+
 	return (
 		<SocketContext.Provider
 			value={{
@@ -64,6 +70,7 @@ const SocketContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 				joinGame,
 				sendPlayerIsReady,
 				attemptMove,
+				tryUseBooster,
 			}}
 		>
 			{props.children}

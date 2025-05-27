@@ -7,6 +7,7 @@ export interface IAuthContext {
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 	updateUserData: () => Promise<void>;
+	userId: number | null;
 	username: string | null;
 }
 
@@ -14,6 +15,7 @@ const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
 const AuthContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [userId, setUserId] = useState<number | null>(null);
 	const [username, setUsername] = useState<string | null>(null);
 
 	const updateUserData = async () => {
@@ -22,11 +24,13 @@ const AuthContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 				"/api/auth/me"
 			);
 			if (status === 200) {
+				setUserId(data.id);
 				setUsername(data.username);
 				setIsLoggedIn(true);
 			}
 		} catch {
 			setIsLoggedIn(false);
+			setUserId(null);
 			setUsername(null);
 		}
 	};
@@ -41,6 +45,7 @@ const AuthContextProvider: React.FC<React.PropsWithChildren> = (props) => {
 				isLoggedIn,
 				setIsLoggedIn,
 				updateUserData,
+				userId,
 				username,
 			}}
 		>

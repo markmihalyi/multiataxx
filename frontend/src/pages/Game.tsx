@@ -1,6 +1,8 @@
 import "../styles/Error&Ready.css";
 
 import {
+	Booster,
+	Cell,
 	GameResult,
 	GameState,
 	GameStateChangedResponse,
@@ -31,8 +33,9 @@ function secondsToTime(seconds: number): string {
 }
 
 function Game() {
-	const { socket, connect, joinGame, sendPlayerIsReady } = useSocket();
-	const { username } = useAuth();
+	const { socket, connect, joinGame, sendPlayerIsReady, tryUseBooster } =
+		useSocket();
+	const { username, isLoggedIn } = useAuth();
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 
@@ -42,10 +45,11 @@ function Game() {
 	const [showError, setShowError] = useState(false);
 
 	const [gameType, setGameType] = useState<GameType | null>(null);
+	const [boosters, setBoosters] = useState<Booster[]>([]);
 	const [ownPlayerId, setOwnPlayerId] = useState<number>(-1);
 	const [otherPlayerName, setOtherPlayerName] = useState<string | null>(null);
 	const [gameState, setGameState] = useState<GameState | null>(null);
-	const [cells, setCells] = useState<CellState[][] | null>(null);
+	const [cells, setCells] = useState<Cell[][] | null>(null);
 	const [playerIsReady, setPlayerIsReady] = useState(false);
 	const [timeRemaining, setTimeRemaining] = useState<number[] | null>(null);
 	const [gameResult, setGameResult] = useState<GameResult | null>(null);
@@ -78,11 +82,38 @@ function Game() {
 					setShowError(true);
 				}
 			}
+
+			await updateBoosters();
 		}
 
 		connectToHub();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const updateCells = (newCellStates: CellState[][]) => {
+		const cells: Cell[][] = [];
+		for (let i = 0; i < newCellStates.length; i++) {
+			const cellsInRow: Cell[] = [];
+			for (let j = 0; j < newCellStates.length; j++) {
+				cellsInRow.push({
+					state: newCellStates[i][j],
+					isTipStartPoint: false,
+					isTipDestPoint: false,
+				});
+			}
+			cells.push(cellsInRow);
+		}
+		setCells(cells);
+	};
+
+	const updateBoosters = async () => {
+		if (isLoggedIn) {
+			const { data } = await api.get<Booster[]>("/api/game/boosters");
+			if (data !== null) {
+				setBoosters(data);
+			}
+		}
+	};
 
 	useEffect(() => {
 		if (socket === null) return;
@@ -94,8 +125,8 @@ function Game() {
 			setOwnPlayerId(data.ownPlayerId);
 			setOtherPlayerName(data.otherPlayerName);
 			setGameState(data.state);
-			setCells(data.cells);
 			setTimeRemaining(data.timeRemaining);
+			updateCells(data.cells);
 		});
 
 		socket.on("JoinFailed", () => {
@@ -112,14 +143,33 @@ function Game() {
 		socket.on("GameStateChanged", (data: GameStateChangedResponse) => {
 			console.log("GameStateChanged", data);
 			setGameState(data.state);
-			setCells(data.cells);
 			setTimeRemaining(data.timeRemaining);
+			updateCells(data.cells);
 			if (data.gameResult) {
 				setGameResult(data.gameResult);
 			}
 		});
 
+		socket.on(
+			"TipReceived",
+			async (
+				startRow: number,
+				startCol: number,
+				destRow: number,
+				destCol: number
+			) => {
+				setCells((cells) => {
+					if (cells === null) return cells;
+					cells[startRow - 1][startCol - 1].isTipStartPoint = true;
+					cells[destRow - 1][destCol - 1].isTipDestPoint = true;
+					return cells;
+				});
+				await updateBoosters();
+			}
+		);
+
 		setSubscribed(true);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [socket]);
 
 	useEffect(() => {
@@ -195,6 +245,19 @@ function Game() {
 					cells !== null &&
 					gameState !== null && (
 						<>
+							<div>
+								{boosters.map((booster) => (
+									<button
+										key={booster.id}
+										onClick={() =>
+											tryUseBooster(booster.id)
+										}
+									>
+										{booster.name} ({booster.amount})
+									</button>
+								))}
+							</div>
+
 							<div className="game-container">
 								<div
 									className="user-container"
