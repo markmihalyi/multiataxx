@@ -24,6 +24,7 @@ function MultiHost() {
 						"30:00",
 					]}
 					options2={["Small (5x5)", "Medium (7x7)", "Large (9x9)"]}
+					gameType="multiplayer"
 				/>
 			</div>
 		</>

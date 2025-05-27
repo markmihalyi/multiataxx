@@ -10,12 +10,15 @@ export type HostGameApiResponse = ApiResponse & { gameCode: string };
 export type MeApiResponse = { id: number; username: string };
 
 export type JoinSuccessfulResponse = {
+	gameType: GameType;
 	ownPlayerId: number;
 	otherPlayerName: string | null;
 	state: GameState;
 	cells: CellState[][];
 	timeRemaining: number[];
 };
+
+export type GameType = "SinglePlayer" | "MultiPlayer";
 
 export type GameStateChangedResponse = {
 	state: GameState;

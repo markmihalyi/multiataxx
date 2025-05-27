@@ -1,23 +1,25 @@
 import "../styles/Error&Ready.css";
-import GameCodeCopier from "../components/GameCodeCopier";
-import GameOverPopup from "../components/GameOverPopup";
 
 import {
 	GameResult,
 	GameState,
 	GameStateChangedResponse,
+	GameType,
 	JoinSuccessfulResponse,
 } from "../types";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 
 import { CellState } from "../constants";
 import Error from "../components/Error";
+import GameCodeCopier from "../components/GameCodeCopier";
+import GameOverPopup from "../components/GameOverPopup";
 import Navbar from "../layouts/Navbar";
 import Ready from "../components/Ready";
 import Table from "../components/Table";
 import ThreeDotLoading from "../components/ThreeDotLoading";
+import api from "../api";
 import useAuth from "../common/hooks/useAuth";
-import { useSearchParams, useNavigate } from "react-router";
 import useSocket from "../common/hooks/useSocket";
 
 function secondsToTime(seconds: number): string {
@@ -39,6 +41,7 @@ function Game() {
 	const [joined, setJoined] = useState(false);
 	const [showError, setShowError] = useState(false);
 
+	const [gameType, setGameType] = useState<GameType | null>(null);
 	const [ownPlayerId, setOwnPlayerId] = useState<number>(-1);
 	const [otherPlayerName, setOtherPlayerName] = useState<string | null>(null);
 	const [gameState, setGameState] = useState<GameState | null>(null);
@@ -52,12 +55,31 @@ function Game() {
 			try {
 				await connect();
 				setConnected(true);
-				console.log("✅ SignalR connection estabilished.");
+				console.log("✅ SignalR connection established.");
 			} catch (error) {
-				setShowError(true);
-				console.error("❌ SignalR error:", error);
+				console.warn("⚠️ Initial SignalR connection failed:", error);
+
+				try {
+					await api.post(
+						"/api/auth/refresh",
+						{},
+						{ withCredentials: true }
+					);
+					await connect();
+					setConnected(true);
+					console.log(
+						"✅ SignalR connection established after token refresh."
+					);
+				} catch (refreshError) {
+					console.error(
+						"❌ SignalR connection failed even after token refresh:",
+						refreshError
+					);
+					setShowError(true);
+				}
 			}
 		}
+
 		connectToHub();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
@@ -68,6 +90,7 @@ function Game() {
 		socket.on("JoinSuccessful", (data: JoinSuccessfulResponse) => {
 			console.log("JoinSuccessful", data);
 			setJoined(true);
+			setGameType(data.gameType);
 			setOwnPlayerId(data.ownPlayerId);
 			setOtherPlayerName(data.otherPlayerName);
 			setGameState(data.state);
@@ -124,7 +147,12 @@ function Game() {
 
 	const intervalRef = useRef<number | null>(null);
 	useEffect(() => {
-		if (timeRemaining === null || gameResult !== null) return;
+		if (
+			gameType !== "MultiPlayer" ||
+			timeRemaining === null ||
+			gameResult !== null
+		)
+			return;
 
 		intervalRef.current = setInterval(() => {
 			setTimeRemaining((times) => {
@@ -185,7 +213,8 @@ function Game() {
 									</div>
 									<div className="user-time">
 										<p id="user1-time-p">
-											{timeRemaining !== null
+											{timeRemaining !== null &&
+											gameType === "MultiPlayer"
 												? secondsToTime(
 														timeRemaining[0]
 												  )
@@ -215,7 +244,8 @@ function Game() {
 									</div>
 									<div className="user-time">
 										<p id="user2-time-p">
-											{timeRemaining !== null
+											{timeRemaining !== null &&
+											gameType === "MultiPlayer"
 												? secondsToTime(
 														timeRemaining[1]
 												  )

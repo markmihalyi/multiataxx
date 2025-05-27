@@ -15,6 +15,7 @@ function MultiJoin() {
 					canDisable={true}
 					options1={[]}
 					options2={[]}
+					gameType="multiplayer"
 				/>
 			</div>
 		</>
