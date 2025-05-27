@@ -8,7 +8,7 @@ class Program
     {
         // inicializálás
         GameState gameState = new GameState(5);
-        BotService botService = new BotService(gameState, AI.DifficultyLevel.Hard);
+        BotService botService = new BotService(gameState, AI.Abstractions.GameDifficulty.Easy);
 
         // első oszlop 2. sor
         // A játék futtatása

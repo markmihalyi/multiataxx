@@ -9,6 +9,7 @@ public class Minimax
     private int maxPlayer = 2;
     private int minPlayer = 1;
 
+
     private Dictionary<string, int> _memoria = new Dictionary<string, int>();
     public Minimax(GameState gameState, int maxDepth, int maximazingPlayer = 2)
     {
@@ -46,9 +47,12 @@ public class Minimax
     {
         using var sha256 = System.Security.Cryptography.SHA256.Create();
         // A tábla adatait és a játékos azonosítóját egy byte tömbbe másoljuk
-        var boardBytes = new byte[gameState.Board.Length * sizeof(int) + 1];
+        var boardBytes = new byte[gameState.Board.Length * sizeof(int) + 3];
         Buffer.BlockCopy(gameState.Board, 0, boardBytes, 0, gameState.Board.Length * sizeof(int));
         boardBytes[^1] = (byte)gameState.CurrentPlayer; // Játékos azonosító hozzáadása
+        boardBytes[^2] = (byte)maxPlayer; // Játékos azonosító hozzáadása
+        boardBytes[^3] = (byte)_maxDepth; // Játékos azonosító hozzáadása
+
         // Hash kiszámítása
         var hash = sha256.ComputeHash(boardBytes);
         // Base64 stringként visszaadjuk a kulcsot
