@@ -2,7 +2,6 @@
 using Backend.GameBase.Entities;
 using Backend.GameBase.Logic;
 using Backend.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Hubs
@@ -34,7 +33,6 @@ namespace Backend.Hubs
             await Clients.Caller.SendAsync("JoinSuccessful", gameData);
         }
 
-        [Authorize]
         public async Task PlayerIsReady()
         {
             int userId = Convert.ToInt32(Context?.UserIdentifier);
@@ -60,7 +58,6 @@ namespace Backend.Hubs
             await Clients.Caller.SendAsync(status);
         }
 
-        [Authorize]
         public async Task UseBooster(int boosterId)
         {
             int userId = Convert.ToInt32(Context?.UserIdentifier);

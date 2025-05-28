@@ -14,7 +14,7 @@ GO
 -- Initialize database
 USE [MultiAtaxx]
 GO
-/****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 05. 05. 22:08:40 ******/
+/****** Object:  Table [dbo].[Boosters]    Script Date: 2025. 05. 27. 19:10:07 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -22,14 +22,15 @@ GO
 CREATE TABLE [dbo].[Boosters](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[Name] [nvarchar](30) NOT NULL,
-	[Price] [int] NOT NULL,
+	[Price] [float] NOT NULL,
+	[Action] [int] NOT NULL,
  CONSTRAINT [PK_Boosters] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Matches]    Script Date: 2025. 05. 05. 22:08:40 ******/
+/****** Object:  Table [dbo].[Matches]    Script Date: 2025. 05. 27. 19:10:07 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -48,7 +49,7 @@ CREATE TABLE [dbo].[Matches](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[OwnedBoosters]    Script Date: 2025. 05. 05. 22:08:40 ******/
+/****** Object:  Table [dbo].[OwnedBoosters]    Script Date: 2025. 05. 27. 19:10:07 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -57,14 +58,14 @@ CREATE TABLE [dbo].[OwnedBoosters](
 	[UserId] [int] NOT NULL,
 	[BoosterId] [int] NOT NULL,
 	[Amount] [int] NOT NULL,
- CONSTRAINT [PK_OwnedBoosters] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_OwnedBoosters_1] PRIMARY KEY CLUSTERED 
 (
 	[UserId] ASC,
 	[BoosterId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Users]    Script Date: 2025. 05. 05. 22:08:40 ******/
+/****** Object:  Table [dbo].[Users]    Script Date: 2025. 05. 27. 19:10:07 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -82,7 +83,7 @@ CREATE TABLE [dbo].[Users](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[UserStatistics]    Script Date: 2025. 05. 05. 22:08:40 ******/
+/****** Object:  Table [dbo].[UserStatistics]    Script Date: 2025. 05. 27. 19:10:07 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

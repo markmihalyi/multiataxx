@@ -1,23 +1,28 @@
 import "../styles/Error&Ready.css";
-import GameCodeCopier from "../components/GameCodeCopier";
-import GameOverPopup from "../components/GameOverPopup";
+import "../styles/OffCanvas.css";
 
 import {
+	Booster,
+	Cell,
 	GameResult,
 	GameState,
 	GameStateChangedResponse,
+	GameType,
 	JoinSuccessfulResponse,
 } from "../types";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 
 import { CellState } from "../constants";
 import Error from "../components/Error";
+import GameCodeCopier from "../components/GameCodeCopier";
+import GameOverPopup from "../components/GameOverPopup";
 import Navbar from "../layouts/Navbar";
 import Ready from "../components/Ready";
 import Table from "../components/Table";
 import ThreeDotLoading from "../components/ThreeDotLoading";
+import api from "../api";
 import useAuth from "../common/hooks/useAuth";
-import { useSearchParams, useNavigate } from "react-router";
 import useSocket from "../common/hooks/useSocket";
 
 function secondsToTime(seconds: number): string {
@@ -29,8 +34,9 @@ function secondsToTime(seconds: number): string {
 }
 
 function Game() {
-	const { socket, connect, joinGame, sendPlayerIsReady } = useSocket();
-	const { username } = useAuth();
+	const { socket, connect, joinGame, sendPlayerIsReady, tryUseBooster } =
+		useSocket();
+	const { username, isLoggedIn } = useAuth();
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 
@@ -38,11 +44,14 @@ function Game() {
 	const [subscribed, setSubscribed] = useState(false);
 	const [joined, setJoined] = useState(false);
 	const [showError, setShowError] = useState(false);
+	const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
+	const [gameType, setGameType] = useState<GameType | null>(null);
+	const [boosters, setBoosters] = useState<Booster[]>([]);
 	const [ownPlayerId, setOwnPlayerId] = useState<number>(-1);
 	const [otherPlayerName, setOtherPlayerName] = useState<string | null>(null);
 	const [gameState, setGameState] = useState<GameState | null>(null);
-	const [cells, setCells] = useState<CellState[][] | null>(null);
+	const [cells, setCells] = useState<Cell[][] | null>(null);
 	const [playerIsReady, setPlayerIsReady] = useState(false);
 	const [timeRemaining, setTimeRemaining] = useState<number[] | null>(null);
 	const [gameResult, setGameResult] = useState<GameResult | null>(null);
@@ -52,15 +61,61 @@ function Game() {
 			try {
 				await connect();
 				setConnected(true);
-				console.log("✅ SignalR connection estabilished.");
+				console.log("✅ SignalR connection established.");
 			} catch (error) {
-				setShowError(true);
-				console.error("❌ SignalR error:", error);
+				console.warn("⚠️ Initial SignalR connection failed:", error);
+
+				try {
+					await api.post(
+						"/api/auth/refresh",
+						{},
+						{ withCredentials: true }
+					);
+					await connect();
+					setConnected(true);
+					console.log(
+						"✅ SignalR connection established after token refresh."
+					);
+				} catch (refreshError) {
+					console.error(
+						"❌ SignalR connection failed even after token refresh:",
+						refreshError
+					);
+					setShowError(true);
+				}
 			}
+
+			await updateBoosters();
 		}
+
 		connectToHub();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const updateCells = (newCellStates: CellState[][]) => {
+		const cells: Cell[][] = [];
+		for (let i = 0; i < newCellStates.length; i++) {
+			const cellsInRow: Cell[] = [];
+			for (let j = 0; j < newCellStates.length; j++) {
+				cellsInRow.push({
+					state: newCellStates[i][j],
+					isTipStartPoint: false,
+					isTipDestPoint: false,
+				});
+			}
+			cells.push(cellsInRow);
+		}
+		setCells(cells);
+	};
+
+	const updateBoosters = async () => {
+		if (isLoggedIn) {
+			const { data } = await api.get<Booster[]>("/api/game/boosters");
+			if (data !== null) {
+				setBoosters(data);
+			}
+		}
+	};
 
 	useEffect(() => {
 		if (socket === null) return;
@@ -68,11 +123,12 @@ function Game() {
 		socket.on("JoinSuccessful", (data: JoinSuccessfulResponse) => {
 			console.log("JoinSuccessful", data);
 			setJoined(true);
+			setGameType(data.gameType);
 			setOwnPlayerId(data.ownPlayerId);
 			setOtherPlayerName(data.otherPlayerName);
 			setGameState(data.state);
-			setCells(data.cells);
 			setTimeRemaining(data.timeRemaining);
+			updateCells(data.cells);
 		});
 
 		socket.on("JoinFailed", () => {
@@ -89,14 +145,33 @@ function Game() {
 		socket.on("GameStateChanged", (data: GameStateChangedResponse) => {
 			console.log("GameStateChanged", data);
 			setGameState(data.state);
-			setCells(data.cells);
 			setTimeRemaining(data.timeRemaining);
+			updateCells(data.cells);
 			if (data.gameResult) {
 				setGameResult(data.gameResult);
 			}
 		});
 
+		socket.on(
+			"TipReceived",
+			async (
+				startRow: number,
+				startCol: number,
+				destRow: number,
+				destCol: number
+			) => {
+				setCells((cells) => {
+					if (cells === null) return cells;
+					cells[startRow - 1][startCol - 1].isTipStartPoint = true;
+					cells[destRow - 1][destCol - 1].isTipDestPoint = true;
+					return cells;
+				});
+				await updateBoosters();
+			}
+		);
+
 		setSubscribed(true);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [socket]);
 
 	useEffect(() => {
@@ -124,7 +199,12 @@ function Game() {
 
 	const intervalRef = useRef<number | null>(null);
 	useEffect(() => {
-		if (timeRemaining === null || gameResult !== null) return;
+		if (
+			gameType !== "MultiPlayer" ||
+			timeRemaining === null ||
+			gameResult !== null
+		)
+			return;
 
 		intervalRef.current = setInterval(() => {
 			setTimeRemaining((times) => {
@@ -167,6 +247,68 @@ function Game() {
 					cells !== null &&
 					gameState !== null && (
 						<>
+							{isOffcanvasOpen && (
+								<div
+									className="offcanvas-backdrop"
+									onClick={() => setIsOffcanvasOpen(false)}
+								></div>
+							)}
+							<div
+								className={`offcanvas ${
+									isOffcanvasOpen ? "open" : ""
+								}`}
+							>
+								<div className="offcanvas-header">
+									<h2>Boosters</h2>
+									<button
+										className="close-btn"
+										onClick={() =>
+											setIsOffcanvasOpen(false)
+										}
+									>
+										&times;
+									</button>
+								</div>
+								<div className="offcanvas-content">
+									{boosters.map((booster) => (
+										<button
+											key={booster.id}
+											onClick={() =>
+												tryUseBooster(booster.id)
+											}
+											className="booster-btn"
+											id={
+												booster.id === 1
+													? "common"
+													: booster.id === 2
+													? "smart"
+													: booster.id === 3
+													? "pro"
+													: undefined
+											}
+										>
+											{booster.name} ({booster.amount})
+										</button>
+									))}
+								</div>
+								<button
+									className={`offcanvas-toggle ${
+										isOffcanvasOpen ? "open" : ""
+									}`}
+									onClick={() =>
+										setIsOffcanvasOpen((prev) => !prev)
+									}
+								>
+									<span
+										className={`offcanvas-arrow ${
+											isOffcanvasOpen ? "rotated" : ""
+										}`}
+									>
+										◀
+									</span>
+								</button>
+							</div>
+
 							<div className="game-container">
 								<div
 									className="user-container"
@@ -185,7 +327,8 @@ function Game() {
 									</div>
 									<div className="user-time">
 										<p id="user1-time-p">
-											{timeRemaining !== null
+											{timeRemaining !== null &&
+											gameType === "MultiPlayer"
 												? secondsToTime(
 														timeRemaining[0]
 												  )
@@ -215,7 +358,8 @@ function Game() {
 									</div>
 									<div className="user-time">
 										<p id="user2-time-p">
-											{timeRemaining !== null
+											{timeRemaining !== null &&
+											gameType === "MultiPlayer"
 												? secondsToTime(
 														timeRemaining[1]
 												  )

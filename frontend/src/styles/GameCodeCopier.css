@@ -30,7 +30,7 @@
 	color: white;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.99px) {
 	.game-code-input {
 		width: 8rem;
 	}

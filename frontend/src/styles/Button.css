@@ -54,7 +54,7 @@
 	);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.99px) {
 	.customButton {
 		padding: 0 1rem;
 		height: 6rem;

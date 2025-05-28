@@ -152,4 +152,22 @@ public class StoreController(GameService gameService) : ControllerBase
         return Ok(new { confirmedIntent.Id, confirmedIntent.Status });
     }
 
+    /// <summary>
+    /// Test endpoint to add boosters to users
+    /// </summary>
+    /// <response code="200">If the request was successful</response>
+    [HttpPost("test-add-booster")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> AddBooster([FromBody] TestStripePaymentRequest body)
+    {
+        var booster = await _gameService.GetBoosterById(body.BoosterId);
+        if (booster == null)
+        {
+            return BadRequest(new ErrorResponse("There is no booster with the specified ID."));
+        }
+
+        await _gameService.AddBoosterToUser(body.UserId, body.BoosterId, body.Amount);
+
+        return Ok();
+    }
 }

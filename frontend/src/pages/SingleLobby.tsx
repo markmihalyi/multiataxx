@@ -15,6 +15,7 @@ function SingleLobby() {
 					canDisable={false}
 					options1={["Easy", "Medium", "Hard"]}
 					options2={["Small (5x5)", "Medium (7x7)", "Large (9x9)"]}
+					gameType="singleplayer"
 				/>
 			</div>
 		</>

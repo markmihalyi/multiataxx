@@ -101,7 +101,7 @@
 	box-shadow: none;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.99px) {
 	.register-container {
 		width: 18.75rem;
 		padding: 1.25rem;

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 import Cell from "./Cell";
-import { GameState } from "../types";
 import { CellPosition } from "../types";
 import { CellState } from "../constants";
+import { Cell as CellType } from "../types";
+import { GameState } from "../types";
 import useSocket from "../common/hooks/useSocket";
 
 type TableProps = {
-	cells: CellState[][];
+	cells: CellType[][];
 	ownCellState: CellState;
 	gameState: GameState;
 };
@@ -50,11 +51,13 @@ const Table: React.FC<TableProps> = ({ cells, ownCellState, gameState }) => {
 			}}
 		>
 			{cells.map((cellRow, row) =>
-				cellRow.map((cellState, col) => (
+				cellRow.map((cell, col) => (
 					<Cell
 						key={`${row}-${col}`}
-						state={cellState}
-						onClick={() => handleCellClick(cellState, { row, col })}
+						cellData={cell}
+						onClick={() =>
+							handleCellClick(cell.state, { row, col })
+						}
 						selected={
 							startPosition?.row === row &&
 							startPosition?.col === col

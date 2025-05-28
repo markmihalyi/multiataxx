@@ -1,12 +1,12 @@
 import "../styles/Panel.css";
 
+import { ApiResponse, HostGameApiResponse } from "../types";
 import api, { handleAxiosError } from "../api";
 
 import Dropdown from "../components/Dropdown";
 import useAuth from "../common/hooks/useAuth";
 import { useNavigate } from "react-router";
 import { useState } from "react";
-import { ApiResponse, HostGameApiResponse } from "../types";
 
 type PanelProps = {
 	panelTitle: string;
@@ -17,6 +17,7 @@ type PanelProps = {
 	canDisable: boolean;
 	options1: string[];
 	options2: string[];
+	gameType: "multiplayer" | "singleplayer";
 };
 
 const Panel: React.FC<PanelProps> = ({
@@ -27,6 +28,7 @@ const Panel: React.FC<PanelProps> = ({
 	canDisable,
 	options1,
 	options2,
+	gameType,
 }) => {
 	const { isLoggedIn } = useAuth();
 	const navigate = useNavigate();
@@ -45,11 +47,6 @@ const Panel: React.FC<PanelProps> = ({
 	const [inputError, setInputError] = useState<boolean>(false);
 
 	const handleHostGame = async () => {
-		let turnMinutes = 0;
-		const timeData = selectedTime?.split(":") || ["0", "30"];
-		turnMinutes += Number(timeData[0]);
-		turnMinutes += Number(timeData[1]) / 60;
-
 		let boardSize = "";
 		switch (selectedBoardSize) {
 			case "Small (5x5)":
@@ -65,13 +62,23 @@ const Panel: React.FC<PanelProps> = ({
 				break;
 		}
 
+		let turnMinutes = 0;
+		const timeData = selectedTime?.split(":") || ["0", "30"];
+		turnMinutes += Number(timeData[0]);
+		turnMinutes += Number(timeData[1]) / 60;
+
 		try {
 			const { status, data } = await api.post<HostGameApiResponse>(
 				"/api/game",
 				{
-					gameType: "multiplayer",
+					gameType,
 					boardSize,
-					turnMinutes,
+					turnMinutes:
+						gameType === "multiplayer" ? turnMinutes : null,
+					difficulty:
+						gameType === "singleplayer"
+							? difficultyLevel?.toLowerCase()
+							: null,
 				}
 			);
 			if (status === 200) {
