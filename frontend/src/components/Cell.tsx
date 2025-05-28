@@ -15,13 +15,13 @@ const Cell: React.FC<CellProps> = ({ cellData, onClick, selected }) => {
 	return (
 		<div
 			className={`cell ${cellState} ${selected ? "selected" : ""}`}
-			style={{
-				background: cellData.isTipStartPoint
-					? "yellow"
+			id={
+				cellData.isTipStartPoint
+					? "start"
 					: cellData.isTipDestPoint
-					? "orange"
-					: undefined,
-			}}
+					? "dest"
+					: ""
+			}
 			onClick={onClick}
 		></div>
 	);

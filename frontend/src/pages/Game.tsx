@@ -1,4 +1,5 @@
 import "../styles/Error&Ready.css";
+import "../styles/OffCanvas.css";
 
 import {
 	Booster,
@@ -43,6 +44,7 @@ function Game() {
 	const [subscribed, setSubscribed] = useState(false);
 	const [joined, setJoined] = useState(false);
 	const [showError, setShowError] = useState(false);
+	const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
 	const [gameType, setGameType] = useState<GameType | null>(null);
 	const [boosters, setBoosters] = useState<Booster[]>([]);
@@ -245,17 +247,66 @@ function Game() {
 					cells !== null &&
 					gameState !== null && (
 						<>
-							<div>
-								{boosters.map((booster) => (
+							{isOffcanvasOpen && (
+								<div
+									className="offcanvas-backdrop"
+									onClick={() => setIsOffcanvasOpen(false)}
+								></div>
+							)}
+							<div
+								className={`offcanvas ${
+									isOffcanvasOpen ? "open" : ""
+								}`}
+							>
+								<div className="offcanvas-header">
+									<h2>Boosters</h2>
 									<button
-										key={booster.id}
+										className="close-btn"
 										onClick={() =>
-											tryUseBooster(booster.id)
+											setIsOffcanvasOpen(false)
 										}
 									>
-										{booster.name} ({booster.amount})
+										&times;
 									</button>
-								))}
+								</div>
+								<div className="offcanvas-content">
+									{boosters.map((booster) => (
+										<button
+											key={booster.id}
+											onClick={() =>
+												tryUseBooster(booster.id)
+											}
+											className="booster-btn"
+											id={
+												booster.id === 1
+													? "common"
+													: booster.id === 2
+													? "smart"
+													: booster.id === 3
+													? "pro"
+													: undefined
+											}
+										>
+											{booster.name} ({booster.amount})
+										</button>
+									))}
+								</div>
+								<button
+									className={`offcanvas-toggle ${
+										isOffcanvasOpen ? "open" : ""
+									}`}
+									onClick={() =>
+										setIsOffcanvasOpen((prev) => !prev)
+									}
+								>
+									<span
+										className={`offcanvas-arrow ${
+											isOffcanvasOpen ? "rotated" : ""
+										}`}
+									>
+										◀
+									</span>
+								</button>
 							</div>
 
 							<div className="game-container">

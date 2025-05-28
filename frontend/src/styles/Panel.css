@@ -69,7 +69,7 @@ h2 {
 			@media
 ----------------------------*/
 /*Phones portrait*/
-@media (max-width: 599px) and (orientation: portrait) {
+@media (max-width: 599.99px) and (orientation: portrait) {
 	.panel-container {
 		width: 70%;
 	}
@@ -93,7 +93,7 @@ h2 {
 }
 
 /*Phones landscape*/
-@media (max-width: 699px) and (orientation: landscape) {
+@media (max-width: 699.99px) and (orientation: landscape) {
 	.panel-container {
 		width: 30rem;
 	}

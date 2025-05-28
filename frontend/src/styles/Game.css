@@ -87,8 +87,13 @@
 	overflow: hidden;
 	cursor: default;
 }
-.cell.selected {
+.cell.selected,
+#start {
 	border: 3px solid black;
+}
+
+#dest {
+	background: lightblue;
 }
 
 .Wall {
@@ -111,7 +116,7 @@
 			@media
 ----------------------------*/
 /*Phones portrait*/
-@media (max-width: 599px) and (orientation: portrait) {
+@media (max-width: 599.99px) and (orientation: portrait) {
 	#in-game-copier {
 		bottom: 0.5rem;
 	}
@@ -141,7 +146,7 @@
 }
 
 /*Tablets portrait*/
-@media (min-width: 600px) and (max-width: 1023px) and (orientation: portrait) {
+@media (min-width: 600px) and (max-width: 1023.99px) and (orientation: portrait) {
 	#in-game-copier {
 		bottom: 0.5rem;
 	}
@@ -152,6 +157,7 @@
 
 	.table {
 		width: 60%;
+		max-width: 22rem;
 		gap: 0.7rem;
 		aspect-ratio: 1;
 	}
@@ -201,7 +207,7 @@
 }
 
 /*Phones landscape*/
-@media (max-width: 949px) and (orientation: landscape) {
+@media (max-width: 949.99px) and (orientation: landscape) {
 	#in-game-copier {
 		top: 0.8rem;
 	}
@@ -240,7 +246,7 @@
 }
 
 /*Tablets landscape*/
-@media (min-width: 950px) and (max-width: 1919px) and (orientation: landscape) {
+@media (min-width: 950px) and (max-width: 1919.99px) and (orientation: landscape) {
 	#in-game-copier {
 		bottom: 0.5rem;
 	}
